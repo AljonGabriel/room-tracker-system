@@ -1,0 +1,398 @@
+import axios from "axios";
+import React from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+
+const UpdateModal = ({
+  floor,
+  room,
+  selectedDate,
+  building,
+  buildingData,
+  professor,
+  selectedDean,
+  id,
+  timeEnd,
+  timeStart,
+  timeSlots,
+  occupiedTimes,
+  forceUpdate,
+}) => {
+  const [updateSelectedBuilding, setUpdateSelectedBuilding] = useState("");
+  const [updateSelectedFloor, setUpdateSelectedFloor] = useState("");
+  const [updateSelectedRoom, setUpdateSelectedRoom] = useState("");
+  const [updateStartTime, setUpdateStartTime] = useState("");
+  const [updateEndTime, setUpdateEndTime] = useState("");
+  const [updateSelectedEntry, setUpdateSelectedEntry] = useState("");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const buildings = Object.keys(buildingData);
+  const floors = updateSelectedBuilding
+    ? Object.keys(buildingData[updateSelectedBuilding])
+    : [];
+
+  const dateStr = selectedDate.toLocaleDateString("en-CA");
+
+  const rooms = updateSelectedFloor
+    ? buildingData[updateSelectedBuilding][updateSelectedFloor]
+    : [];
+
+  return (
+    <>
+      <button
+        className="btn btn-sm btn-accent"
+        onClick={() => {
+          setUpdateSelectedEntry({
+            id,
+            timeStart,
+            timeEnd,
+            room,
+            floor,
+            building,
+            professor,
+          });
+          document.getElementById(`update-modal-${professor}`).checked = true;
+        }}
+      >
+        Edit
+      </button>
+
+      {/* Modal */}
+      <input
+        type="checkbox"
+        id={`update-modal-${professor}`}
+        className="modal-toggle"
+      />
+
+      <div className="modal">
+        <div className="modal-box px-8 py-6">
+          <h3 className="text-2xl  text-primary text-center mb-6 border-b border-base-300 pb-3">
+            Update Schedule for{" "}
+            <span className="text-secondary">{professor}</span>
+          </h3>
+          <h3 className="text-md text-center mb-6 pb-3">
+            Schedule ID{" "}
+            <span className="text-secondary">{updateSelectedEntry.id}</span>
+          </h3>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+
+              if (
+                !updateSelectedBuilding ||
+                !updateSelectedFloor ||
+                !updateSelectedRoom ||
+                !updateStartTime ||
+                !updateEndTime
+              ) {
+                toast.error("Please complete all fields before submitting.");
+                return;
+              }
+
+              // Ensure selectedEntry is available
+              if (!updateSelectedEntry || !updateSelectedEntry.id) {
+                toast.error("❌ No schedule selected for update.");
+                return;
+              }
+
+              // Check for time conflicts with other professors
+              const hasConflictWithOthers = occupiedTimes.some((entry) => {
+                if (entry._id === updateSelectedEntry._id) return false;
+
+                return (
+                  entry.professor !== updateSelectedEntry.professor &&
+                  updateStartTime < entry.timeEnd &&
+                  updateEndTime > entry.timeStart
+                );
+              });
+
+              if (hasConflictWithOthers) {
+                toast.error(
+                  "Selected time range overlaps with another Instructor schedule."
+                );
+                return;
+              }
+
+              // Prepare payload
+              const payload = {
+                professor: updateSelectedEntry.professor,
+                assignedBy: selectedDean,
+                building: updateSelectedBuilding,
+                floor: updateSelectedFloor,
+                room: updateSelectedRoom,
+                timeStart: updateStartTime,
+                timeEnd: updateEndTime,
+                date: dateStr,
+              };
+
+              try {
+                const res = await axios.put(
+                  `http://localhost:5001/api/rooms/${updateSelectedEntry.id}`,
+                  payload
+                );
+
+                console.log("Update successful:", res.data);
+                toast.success("✅ Schedule updated successfully!");
+                document.getElementById(
+                  `update-modal-${updateSelectedEntry.professor}`
+                ).checked = false;
+                forceUpdate();
+              } catch (error) {
+                console.error("Update failed:", error);
+                toast.error("❌ Failed to update schedule. Please try again.");
+              }
+            }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Dean Assigned */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Dean Assigned
+                </label>
+                <input
+                  type="text"
+                  className="input input-bordered w-full bg-base-300 text-center font-semibold"
+                  value={selectedDean}
+                  readOnly
+                  disabled
+                />
+              </div>
+
+              {/* Building Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Building
+                </label>
+                <select
+                  name="building"
+                  className="select select-bordered w-full"
+                  value={updateSelectedBuilding}
+                  onChange={(e) => {
+                    setUpdateSelectedBuilding(e.target.value);
+                    setUpdateSelectedFloor("");
+                    setUpdateSelectedRoom("");
+                    setUpdateStartTime("");
+                    setUpdateEndTime("");
+                  }}
+                  required
+                >
+                  <option disabled value="">
+                    Select Building
+                  </option>
+                  {buildings.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Floor Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Floor
+                </label>
+                <select
+                  name="floor"
+                  className="select select-bordered w-full"
+                  value={updateSelectedFloor}
+                  onChange={(e) => {
+                    setUpdateSelectedFloor(e.target.value);
+                    setUpdateSelectedRoom("");
+                    setUpdateStartTime("");
+                    setUpdateEndTime("");
+                  }}
+                  required
+                >
+                  <option disabled value="">
+                    Select Level
+                  </option>
+                  {floors.map((f) => {
+                    const floorNum = parseInt(f.replace(/\D/g, ""));
+                    return (
+                      <option key={f} value={floorNum}>
+                        {floorNum}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            </div>
+            {/* Room Selection */}
+            {rooms.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-md font-semibold mb-3 text-center">
+                  Select a Room
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  {rooms.map((room) => (
+                    <button
+                      key={room}
+                      className={`btn btn-sm w-full ${
+                        updateSelectedRoom === room
+                          ? "btn-primary"
+                          : "btn-outline"
+                      }`}
+                      onClick={() => setUpdateSelectedRoom(room)}
+                    >
+                      {room}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Time Selection */}
+            {updateSelectedRoom && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Start Time */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-base-content">
+                    Class starts at:
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    value={updateStartTime}
+                    onChange={(e) => setUpdateStartTime(e.target.value)}
+                  >
+                    <option disabled value="">
+                      Select time
+                    </option>
+                    {timeSlots.map((slot) => {
+                      const conflict = occupiedTimes.find(
+                        (entry) => entry.slot === slot
+                      );
+
+                      console.log(conflict);
+
+                      const nextConflict = occupiedTimes.find(
+                        (entry) => entry.timeStart === conflict?.timeEnd
+                      );
+
+                      const isOccupied = !!conflict;
+                      const isOwnedByCurrentProfessor =
+                        conflict?.professor === professor;
+                      const isOccupiedByOther =
+                        isOccupied && !isOwnedByCurrentProfessor;
+
+                      let label = `${slot}`;
+                      if (isOccupied) {
+                        label += ` — Instructor: ${conflict.professor} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
+                        if (nextConflict) {
+                          label += ` — then ${nextConflict.professor} from ${nextConflict.timeStart} to ${nextConflict.timeEnd}`;
+                        }
+                        label += ".";
+                      }
+
+                      return (
+                        <option
+                          key={slot}
+                          value={slot}
+                          disabled={isOccupiedByOther}
+                          className={`text-sm ${
+                            isOwnedByCurrentProfessor
+                              ? "bg-green-500 text-white font-semibold"
+                              : isOccupiedByOther
+                              ? "bg-neutral text-neutral-content font-semibold"
+                              : "text-base-content"
+                          }`}
+                        >
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* End Time */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-base-content">
+                    Class ends at:
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    value={updateEndTime}
+                    onChange={(e) => setUpdateEndTime(e.target.value)}
+                  >
+                    <option disabled value="">
+                      Select time
+                    </option>
+                    {timeSlots.map((slot) => {
+                      const conflict = occupiedTimes.find(
+                        (entry) => entry.slot === slot
+                      );
+                      const nextConflict = occupiedTimes.find(
+                        (entry) => entry.timeStart === conflict?.timeEnd
+                      );
+
+                      const isOccupied = !!conflict;
+                      const isOwnedByCurrentProfessor =
+                        conflict?.professor === professor;
+                      const isOccupiedByOther =
+                        isOccupied && !isOwnedByCurrentProfessor;
+
+                      let label = `${slot}`;
+                      if (isOccupied) {
+                        label += ` — Instructor: ${conflict.professor} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
+                        if (nextConflict) {
+                          label += ` — then ${nextConflict.professor} from ${nextConflict.timeStart} to ${nextConflict.timeEnd}`;
+                        }
+                        label += ".";
+                      }
+
+                      return (
+                        <option
+                          key={slot}
+                          value={slot}
+                          disabled={isOccupiedByOther}
+                          className={`text-sm ${
+                            isOwnedByCurrentProfessor
+                              ? "bg-green-500 text-white font-semibold"
+                              : isOccupiedByOther
+                              ? "bg-neutral text-neutral-content font-semibold"
+                              : "text-base-content"
+                          }`}
+                        >
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => {
+                  setUpdateSelectedBuilding("");
+                  setUpdateSelectedFloor("");
+                  setUpdateSelectedRoom("");
+                  setUpdateStartTime("");
+                  setUpdateEndTime("");
+                  document.getElementById(
+                    `update-modal-${professor}`
+                  ).checked = false;
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Confirm Update"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default UpdateModal;
