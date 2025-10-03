@@ -320,6 +320,25 @@ const AssigningRoom = () => {
         </select>
       </div>
 
+      {/* Subject Dropdown */}
+      <div className="flex items-center gap-4">
+        <label className="font-medium w-32">Subject:</label>
+        <select
+          className="select select-bordered flex-1"
+          value={selectedProfessor}
+          onChange={(e) => setSelectedProfessor(e.target.value)}
+        >
+          <option disabled value="">
+            What lesson?
+          </option>
+          {instructorList.map((prof) => (
+            <option key={prof.id} value={prof.fullName}>
+              {prof.fullName}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Building Dropdown */}
       <div className="flex items-center gap-4">
         <label className="font-medium w-32">Building:</label>
