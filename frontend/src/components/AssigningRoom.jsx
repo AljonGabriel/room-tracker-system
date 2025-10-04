@@ -1,5 +1,7 @@
 import buildingData from "../data/buildingData";
 import colorPalette from "../data/colorPalette.js";
+import sections from "../data/sections.js";
+import subjectsByYear from "../data/subjectsByYear.js";
 
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -46,6 +48,9 @@ const AssigningRoom = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [occupiedTimes, setOccupiedTimes] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
 
   const [isRepeating, setIsRepeating] = useState("No");
@@ -85,6 +90,9 @@ const AssigningRoom = () => {
   const uniqueProfessors = Array.from(
     new Set(occupiedTimes.map((entry) => entry.professor))
   );
+
+  // Year and subject toggle
+  const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -320,20 +328,63 @@ const AssigningRoom = () => {
         </select>
       </div>
 
+      {/* Year Dropdown */}
+      <div className="flex items-center gap-4">
+        <label className="font-medium w-32">Year Level:</label>
+
+        <select
+          className="select select-bordered flex-1"
+          value={selectedYear}
+          onChange={(e) => {
+            setSelectedYear(e.target.value);
+            setSelectedSubject(""); // reset subject
+          }}
+        >
+          <option disabled value="">
+            What year level? 🎓
+          </option>
+          {Object.keys(subjectsByYear).map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Subject Dropdown */}
       <div className="flex items-center gap-4">
         <label className="font-medium w-32">Subject:</label>
+        <select
+          className="select select-bordered flex-1"
+          value={selectedSubject}
+          onChange={(e) => setSelectedSubject(e.target.value)}
+          disabled={!selectedYear}
+        >
+          <option disabled value="">
+            What lesson? 📘
+          </option>
+          {subjectOptions.map((subj) => (
+            <option key={subj} value={subj}>
+              {subj}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Sections Dropdown */}
+      <div className="flex items-center gap-4">
+        <label className="font-medium w-32">Section:</label>
         <select
           className="select select-bordered flex-1"
           value={selectedProfessor}
           onChange={(e) => setSelectedProfessor(e.target.value)}
         >
           <option disabled value="">
-            What lesson?
+            What section?
           </option>
-          {instructorList.map((prof) => (
-            <option key={prof.id} value={prof.fullName}>
-              {prof.fullName}
+          {sections.map((sec) => (
+            <option key={sec} value={sec}>
+              {sec}
             </option>
           ))}
         </select>
