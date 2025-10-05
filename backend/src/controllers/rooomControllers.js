@@ -109,6 +109,9 @@ export const assignRoom = async (req, res) => {
   try {
     const {
       date,
+      year,
+      subject,
+      section,
       building,
       floor,
       room,
@@ -119,12 +122,24 @@ export const assignRoom = async (req, res) => {
       repeating,
     } = req.body;
 
-    if (!date || !room || !timeStart || !professor || !assignedBy) {
+    if (
+      !date ||
+      !room ||
+      !timeStart ||
+      !professor ||
+      !assignedBy ||
+      !subject ||
+      !year ||
+      !section
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const newAssignment = new Room({
       date,
+      year,
+      subject,
+      section,
       building,
       floor,
       room,

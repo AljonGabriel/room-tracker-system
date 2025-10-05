@@ -35,24 +35,26 @@ const AssigningRoom = () => {
     ? new Date(location.state.selectedDate)
     : null;
 
-  // Form state
-  const [selectedDean, setSelectedDean] = useState("");
+  // Fetch state
   const [deanList, setDeanList] = useState([]);
-
-  const [selectedProfessor, setSelectedProfessor] = useState("");
   const [instructorList, setInstructorList] = useState([]);
 
+  // Form state
+
+  const [selectedDean, setSelectedDean] = useState("");
+  const [selectedProfessor, setSelectedProfessor] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
   const [selectedBuilding, setSelectedBuilding] = useState("");
   const [selectedFloor, setSelectedFloor] = useState("");
   const [selectedRoom, setSelectedRoom] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [occupiedTimes, setOccupiedTimes] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
 
+  //conditional
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
-
   const [isRepeating, setIsRepeating] = useState("No");
 
   // Derived values
@@ -191,6 +193,9 @@ const AssigningRoom = () => {
     const repeating = isRepeating === "Yes"; // dropdown value
 
     const basePayload = {
+      year: selectedYear,
+      subject: selectedSubject,
+      section: selectedSection,
       building: selectedBuilding,
       floor: parseInt(selectedFloor, 10),
       room: selectedRoom,
@@ -376,8 +381,8 @@ const AssigningRoom = () => {
         <label className="font-medium w-32">Section:</label>
         <select
           className="select select-bordered flex-1"
-          value={selectedProfessor}
-          onChange={(e) => setSelectedProfessor(e.target.value)}
+          value={selectedSection}
+          onChange={(e) => setSelectedSection(e.target.value)}
         >
           <option disabled value="">
             What section?

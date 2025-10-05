@@ -128,7 +128,7 @@ const UpdateModal = ({
 
               try {
                 const res = await axios.put(
-                  `http://localhost:5001/api/rooms/${updateSelectedEntry.id}`,
+                  `http://localhost:5001/api/employees/updateEmp${updateSelectedEntry.id}`,
                   payload
                 );
 
@@ -159,6 +159,35 @@ const UpdateModal = ({
                 />
               </div>
 
+              {/* Year Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Year
+                </label>
+                <select
+                  name="building"
+                  className="select select-bordered w-full"
+                  value={updateSelectedBuilding}
+                  onChange={(e) => {
+                    setUpdateSelectedBuilding(e.target.value);
+                    setUpdateSelectedFloor("");
+                    setUpdateSelectedRoom("");
+                    setUpdateStartTime("");
+                    setUpdateEndTime("");
+                  }}
+                  required
+                >
+                  <option disabled value="">
+                    Select Year Level
+                  </option>
+                  {buildings.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Building Selection */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-base-content">
@@ -186,6 +215,13 @@ const UpdateModal = ({
                     </option>
                   ))}
                 </select>
+                {/* Previous Data Display */}
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">
+                    {building}
+                  </span>
+                </div>
               </div>
 
               {/* Floor Selection */}

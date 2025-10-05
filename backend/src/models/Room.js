@@ -9,6 +9,18 @@ const roomSchema = new mongoose.Schema(
       type: Date || String, // Format: "YYYY-MM-DD"
       required: true,
     },
+    year: {
+      type: String,
+      Required: true,
+    },
+    subject: {
+      type: String,
+      Required: true,
+    },
+    section: {
+      type: String,
+      Required: true,
+    },
     building: {
       type: String,
       required: true,
