@@ -24,6 +24,9 @@ export const getOccupiedRooms = async (req, res) => {
       timeEnd: entry.timeEnd, // End time of the booking
       professor: entry.professor, // Who's assigned
       room: entry.room, // Room assigned
+      year: entry.year,
+      subject: entry.subject,
+      section: entry.section,
       building: entry.building, // Building info
       floor: entry.floor, // Floor info
       date: entry.date, // Floor info

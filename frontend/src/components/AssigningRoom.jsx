@@ -114,7 +114,7 @@ const AssigningRoom = () => {
           },
           signal: controller.signal,
         });
-
+        console.log("Raw data:", res.data);
         const expanded = res.data.flatMap(
           ({
             timeStart,
@@ -125,6 +125,9 @@ const AssigningRoom = () => {
             building,
             _id,
             date,
+            year,
+            subject,
+            section,
           }) =>
             getTimeRange(timeStart, timeEnd).map((slot) => ({
               _id,
@@ -136,6 +139,9 @@ const AssigningRoom = () => {
               timeStart,
               timeEnd,
               date,
+              year,
+              subject,
+              section,
             }))
         );
 

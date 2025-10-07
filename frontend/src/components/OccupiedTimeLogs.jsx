@@ -105,7 +105,18 @@ const OccupiedTimeLogs = ({
               <div className="space-y-2">
                 {uniqueSlots.map(
                   (
-                    { _id, timeStart, timeEnd, room, floor, building, date },
+                    {
+                      _id,
+                      timeStart,
+                      timeEnd,
+                      room,
+                      floor,
+                      building,
+                      date,
+                      year,
+                      subject,
+                      section,
+                    },
                     index
                   ) => (
                     <div
@@ -138,6 +149,9 @@ const OccupiedTimeLogs = ({
                           room={room}
                           selectedDate={selectedDate}
                           building={building}
+                          year={year}
+                          subject={subject}
+                          section={section}
                           buildingData={buildingData}
                           professor={professor}
                           selectedDean={selectedDean}

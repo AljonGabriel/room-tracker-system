@@ -7,6 +7,9 @@ const UpdateModal = ({
   floor,
   room,
   selectedDate,
+  year,
+  subject,
+  section,
   building,
   buildingData,
   professor,
@@ -186,6 +189,76 @@ const UpdateModal = ({
                     </option>
                   ))}
                 </select>
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">{year}</span>
+                </div>
+              </div>
+
+              {/* Subject Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Subject
+                </label>
+                <select
+                  name="building"
+                  className="select select-bordered w-full"
+                  value={updateSelectedBuilding}
+                  onChange={(e) => {
+                    setUpdateSelectedBuilding(e.target.value);
+                    setUpdateSelectedFloor("");
+                    setUpdateSelectedRoom("");
+                    setUpdateStartTime("");
+                    setUpdateEndTime("");
+                  }}
+                  required
+                >
+                  <option disabled value="">
+                    Select Subject
+                  </option>
+                  {buildings.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">{subject}</span>
+                </div>
+              </div>
+
+              {/* Section Selection */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
+                  Section
+                </label>
+                <select
+                  name="building"
+                  className="select select-bordered w-full"
+                  value={updateSelectedBuilding}
+                  onChange={(e) => {
+                    setUpdateSelectedBuilding(e.target.value);
+                    setUpdateSelectedFloor("");
+                    setUpdateSelectedRoom("");
+                    setUpdateStartTime("");
+                    setUpdateEndTime("");
+                  }}
+                  required
+                >
+                  <option disabled value="">
+                    Select Section
+                  </option>
+                  {buildings.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">{section}</span>
+                </div>
               </div>
 
               {/* Building Selection */}
