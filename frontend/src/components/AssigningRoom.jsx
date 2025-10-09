@@ -645,6 +645,8 @@ const AssigningRoom = () => {
             occupiedTimes={occupiedTimes}
             selectedDate={selectedDate}
             forceUpdate={forceUpdate}
+            subjectsByYear={subjectsByYear}
+            sections={sections}
           />
         </>
       )}

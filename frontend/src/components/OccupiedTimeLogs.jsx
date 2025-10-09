@@ -13,6 +13,8 @@ const OccupiedTimeLogs = ({
   forceUpdate,
   occupiedTimes,
   timeSlots,
+  subjectsByYear,
+  sections,
 }) => {
   const handleDeleteAll = async (professor) => {
     const confirmed = window.confirm(
@@ -145,15 +147,15 @@ const OccupiedTimeLogs = ({
 
                       <div className="flex gap-2">
                         <UpdateModal
-                          floor={floor}
+                          prevSelectedFloor={floor}
                           room={room}
                           selectedDate={selectedDate}
-                          building={building}
+                          prevSelectedBuilding={building}
                           year={year}
                           subject={subject}
                           section={section}
                           buildingData={buildingData}
-                          professor={professor}
+                          prevSelectedProff={professor}
                           selectedDean={selectedDean}
                           id={_id}
                           timeStart={timeStart}
@@ -161,6 +163,8 @@ const OccupiedTimeLogs = ({
                           timeSlots={timeSlots}
                           occupiedTimes={occupiedTimes}
                           forceUpdate={forceUpdate}
+                          subjectsByYear={subjectsByYear}
+                          sections={sections}
                         />
                         <button
                           className="btn btn-sm btn-warning"

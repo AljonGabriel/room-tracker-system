@@ -4,15 +4,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 const UpdateModal = ({
-  floor,
+  prevSelectedFloor,
   room,
   selectedDate,
   year,
   subject,
   section,
-  building,
+  prevSelectedBuilding,
   buildingData,
-  professor,
+  prevSelectedProff,
   selectedDean,
   id,
   timeEnd,
@@ -20,7 +20,13 @@ const UpdateModal = ({
   timeSlots,
   occupiedTimes,
   forceUpdate,
+  subjectsByYear,
+  sections,
 }) => {
+  const [updateSelectedYear, setUpdateSelectedYear] = useState("");
+  const [updateSelectedSubject, setUpdateSelectedSubject] = useState("");
+  const [updateSelectedSection, setUpdateSelectedSection] = useState("");
+
   const [updateSelectedBuilding, setUpdateSelectedBuilding] = useState("");
   const [updateSelectedFloor, setUpdateSelectedFloor] = useState("");
   const [updateSelectedRoom, setUpdateSelectedRoom] = useState("");
@@ -41,6 +47,25 @@ const UpdateModal = ({
     ? buildingData[updateSelectedBuilding][updateSelectedFloor]
     : [];
 
+  // Year and subject toggle
+  const subjectOptions = updateSelectedYear
+    ? subjectsByYear[updateSelectedYear]
+    : [];
+
+  const handleCancelUpdate = () => {
+    setUpdateSelectedYear("");
+    setUpdateSelectedSection("");
+    setUpdateSelectedSubject("");
+    setUpdateSelectedBuilding("");
+    setUpdateSelectedFloor("");
+    setUpdateSelectedRoom("");
+    setUpdateStartTime("");
+    setUpdateEndTime("");
+
+    const modal = document.getElementById(`update-modal-${prevSelectedProff}`);
+    if (modal) modal.checked = false;
+  };
+
   return (
     <>
       <button
@@ -51,11 +76,13 @@ const UpdateModal = ({
             timeStart,
             timeEnd,
             room,
-            floor,
-            building,
-            professor,
+            prevSelectedFloor,
+            prevSelectedBuilding,
+            prevSelectedProff,
           });
-          document.getElementById(`update-modal-${professor}`).checked = true;
+          document.getElementById(
+            `update-modal-${prevSelectedProff}`
+          ).checked = true;
         }}
       >
         Edit
@@ -64,7 +91,7 @@ const UpdateModal = ({
       {/* Modal */}
       <input
         type="checkbox"
-        id={`update-modal-${professor}`}
+        id={`update-modal-${prevSelectedProff}`}
         className="modal-toggle"
       />
 
@@ -72,32 +99,12 @@ const UpdateModal = ({
         <div className="modal-box px-8 py-6">
           <h3 className="text-2xl  text-primary text-center mb-6 border-b border-base-300 pb-3">
             Update Schedule for{" "}
-            <span className="text-secondary">{professor}</span>
+            <span className="text-secondary">{prevSelectedProff}</span>
           </h3>
-          <h3 className="text-md text-center mb-6 pb-3">
-            Schedule ID{" "}
-            <span className="text-secondary">{updateSelectedEntry.id}</span>
-          </h3>
+
           <form
             onSubmit={async (e) => {
               e.preventDefault();
-
-              if (
-                !updateSelectedBuilding ||
-                !updateSelectedFloor ||
-                !updateSelectedRoom ||
-                !updateStartTime ||
-                !updateEndTime
-              ) {
-                toast.error("Please complete all fields before submitting.");
-                return;
-              }
-
-              // Ensure selectedEntry is available
-              if (!updateSelectedEntry || !updateSelectedEntry.id) {
-                toast.error("❌ No schedule selected for update.");
-                return;
-              }
 
               // Check for time conflicts with other professors
               const hasConflictWithOthers = occupiedTimes.some((entry) => {
@@ -119,9 +126,8 @@ const UpdateModal = ({
 
               // Prepare payload
               const payload = {
-                professor: updateSelectedEntry.professor,
-                assignedBy: selectedDean,
-                building: updateSelectedBuilding,
+                professor: updateSelectedEntry.professor || prevSelectedProff,
+                building: updateSelectedBuilding || prevSelectedBuilding,
                 floor: updateSelectedFloor,
                 room: updateSelectedRoom,
                 timeStart: updateStartTime,
@@ -147,7 +153,7 @@ const UpdateModal = ({
               }
             }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 gap-6 mb-6">
               {/* Dean Assigned */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-base-content">
@@ -170,22 +176,18 @@ const UpdateModal = ({
                 <select
                   name="building"
                   className="select select-bordered w-full"
-                  value={updateSelectedBuilding}
+                  value={updateSelectedYear}
                   onChange={(e) => {
-                    setUpdateSelectedBuilding(e.target.value);
-                    setUpdateSelectedFloor("");
-                    setUpdateSelectedRoom("");
-                    setUpdateStartTime("");
-                    setUpdateEndTime("");
+                    setUpdateSelectedYear(e.target.value);
                   }}
-                  required
+                  disabled={!selectedDean}
                 >
                   <option disabled value="">
                     Select Year Level
                   </option>
-                  {buildings.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
+                  {Object.keys(subjectsByYear).map((year) => (
+                    <option key={year} value={year}>
+                      {year}
                     </option>
                   ))}
                 </select>
@@ -203,22 +205,18 @@ const UpdateModal = ({
                 <select
                   name="building"
                   className="select select-bordered w-full"
-                  value={updateSelectedBuilding}
+                  value={updateSelectedSubject}
                   onChange={(e) => {
-                    setUpdateSelectedBuilding(e.target.value);
-                    setUpdateSelectedFloor("");
-                    setUpdateSelectedRoom("");
-                    setUpdateStartTime("");
-                    setUpdateEndTime("");
+                    setUpdateSelectedSubject(e.target.value);
                   }}
-                  required
+                  disabled={!updateSelectedYear}
                 >
                   <option disabled value="">
                     Select Subject
                   </option>
-                  {buildings.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
+                  {subjectOptions.map((subj) => (
+                    <option key={subj} value={subj}>
+                      {subj}
                     </option>
                   ))}
                 </select>
@@ -236,22 +234,17 @@ const UpdateModal = ({
                 <select
                   name="building"
                   className="select select-bordered w-full"
-                  value={updateSelectedBuilding}
+                  value={updateSelectedSection}
                   onChange={(e) => {
-                    setUpdateSelectedBuilding(e.target.value);
-                    setUpdateSelectedFloor("");
-                    setUpdateSelectedRoom("");
-                    setUpdateStartTime("");
-                    setUpdateEndTime("");
+                    setUpdateSelectedSection(e.target.value);
                   }}
-                  required
                 >
                   <option disabled value="">
                     Select Section
                   </option>
-                  {buildings.map((b) => (
-                    <option key={b} value={b}>
-                      {b}
+                  {sections.map((sec) => (
+                    <option key={sec} value={sec}>
+                      {sec}
                     </option>
                   ))}
                 </select>
@@ -273,9 +266,6 @@ const UpdateModal = ({
                   onChange={(e) => {
                     setUpdateSelectedBuilding(e.target.value);
                     setUpdateSelectedFloor("");
-                    setUpdateSelectedRoom("");
-                    setUpdateStartTime("");
-                    setUpdateEndTime("");
                   }}
                   required
                 >
@@ -292,7 +282,7 @@ const UpdateModal = ({
                 <div className="text-xs text-gray-500 italic">
                   Previous:{" "}
                   <span className="font-semibold text-gray-700">
-                    {building}
+                    {prevSelectedBuilding}
                   </span>
                 </div>
               </div>
@@ -326,8 +316,16 @@ const UpdateModal = ({
                     );
                   })}
                 </select>
+                {/* Previous Data Display */}
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">
+                    {prevSelectedFloor}
+                  </span>
+                </div>
               </div>
             </div>
+
             {/* Room Selection */}
             {rooms.length > 0 && (
               <div className="mb-6">
@@ -476,16 +474,7 @@ const UpdateModal = ({
               <button
                 type="button"
                 className="btn btn-outline"
-                onClick={() => {
-                  setUpdateSelectedBuilding("");
-                  setUpdateSelectedFloor("");
-                  setUpdateSelectedRoom("");
-                  setUpdateStartTime("");
-                  setUpdateEndTime("");
-                  document.getElementById(
-                    `update-modal-${professor}`
-                  ).checked = false;
-                }}
+                onClick={handleCancelUpdate}
               >
                 Cancel
               </button>
