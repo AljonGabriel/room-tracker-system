@@ -57,6 +57,9 @@ export const getFilteredSchedule = async (req, res) => {
     const fieldMap = {
       instructor: "professor", // 'Instructor' dropdown maps to 'professor'
       dean: "assignedBy", // 'Dean' dropdown maps to 'assignedBy'
+      year: "year", // 'Dean' dropdown maps to 'assignedBy'
+      section: "section", // 'Dean' dropdown maps to 'assignedBy'
+      subject: "subject", // 'Dean' dropdown maps to 'assignedBy'
       building: "building", // 'Building' maps directly
       date: "date", // 'Date' input maps to 'date' field
     };
@@ -172,7 +175,6 @@ export const updateOccupiedRoomTime = async (req, res) => {
   try {
     const updated = await Room.findByIdAndUpdate(id, updateData, {
       new: true, // return the updated document
-      runValidators: true, // optional: enforce schema validation
     });
 
     if (!updated) {
