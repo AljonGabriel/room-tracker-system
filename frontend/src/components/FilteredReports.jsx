@@ -10,9 +10,6 @@ const FilteredReports = () => {
   const [selectedFilter, setSelectedFilter] = useState("Instructor");
   const [selectedValue, setSelectedValue] = useState("");
 
-  // Year and subject toggle
-  const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
-
   console.log(selectedValue);
   const buildingList = Object.keys(buildingData);
   useEffect(() => {
@@ -47,6 +44,40 @@ const FilteredReports = () => {
     return acc;
   }, {});
 
+  const handlePrintCard = (professor) => {
+    const printArea = document.getElementById(`print-area-${professor}`);
+    if (!printArea) return;
+
+    const printWindow = window.open("", "", "width=800,height=600");
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Schedule</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css">
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <style>
+          body {
+            padding: 2rem;
+            font-family: sans-serif;
+            background: white;
+          }
+          .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        ${printArea.innerHTML}
+      </body>
+    </html>
+  `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
   return (
     <div className="bg-base-200 min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4">
@@ -69,7 +100,7 @@ const FilteredReports = () => {
             <option>Building</option>
             <option>Date</option>
             <option>Subject</option>
-            <option>Year Level</option>
+            <option>Year</option>
             <option>Section</option>
           </select>
 
@@ -150,7 +181,7 @@ const FilteredReports = () => {
               onChange={(e) => setSelectedValue(e.target.value)}
             >
               <option value="">Select Year Level</option>
-              {yearList.map((year) => (
+              {Object.keys(subjectsByYear).map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
@@ -181,51 +212,81 @@ const FilteredReports = () => {
         ) : Object.keys(groupedByProfessor).length > 0 ? (
           Object.entries(groupedByProfessor).map(([professor, entries]) => (
             <div key={professor} className="mb-12">
-              <div className="card bg-base-100 shadow-lg">
-                <div className="card-body">
-                  <h2 className="text-2xl  mb-4 border-b border-base-300 pb-2">
-                    {professor}
-                  </h2>
-                  <div className="overflow-x-auto">
-                    <table className="table table-sm table-zebra w-full">
-                      <thead className="bg-neutral text-neutral-content sticky top-0 z-10">
-                        <tr>
-                          <th className="text-sm">Date</th>
-                          <th className="text-sm">Time</th>
-                          <th className="text-sm">Room</th>
-                          <th className="text-sm">Floor</th>
-                          <th className="text-sm">Building</th>
-                          <th className="text-sm">Subject</th>
-                          <th className="text-sm">Year</th>
-                          <th className="text-sm">Section</th>
-                          <th className="text-sm">Assigned By</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {entries.map((entry) => (
-                          <tr
-                            key={entry._id}
-                            className="hover:bg-base-300 transition"
-                          >
-                            <td>{new Date(entry.date).toLocaleDateString()}</td>
-                            <td>
-                              <span className="badge badge-outline badge-info">
-                                {entry.timeStart} - {entry.timeEnd}
-                              </span>
-                            </td>
-                            <td>{entry.room}</td>
-                            <td>{entry.floor}</td>
-                            <td>{entry.building}</td>
-                            <td>{entry.subject}</td>
-                            <td>{entry.year}</td>
-                            <td>{entry.section}</td>
-                            <td className="text-sm text-neutral">
-                              {entry.assignedBy}
-                            </td>
+              <div id={`print-area-${professor}`} className="print-area">
+                <div className="card bg-slate-50 shadow-lg">
+                  <div className="card-body">
+                    <div className="text-center mb-10">
+                      <img
+                        src="/favicon.png"
+                        alt="City College of Angeles Logo"
+                        className="mx-auto h-16 mb-2"
+                      />
+                      <h1 className="text-lg font-bold uppercase text-black">
+                        City College of Angeles
+                      </h1>
+                      <h2 className="text-sm font-medium uppercase text-black tracking-wide">
+                        Institute of Business and Management
+                      </h2>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-6 border-b border-base-300 pb-2">
+                      <h2 className="text-xl font-bold text-black tracking-wide">
+                        Professor:
+                        <span className="text-primary ml-3">{professor}</span>
+                      </h2>
+
+                      <button
+                        onClick={() => handlePrintCard(professor)}
+                        className="btn btn-outline btn-primary"
+                      >
+                        🖨️
+                      </button>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="table table-sm w-full">
+                        <thead className="bg-gray-700 text-white sticky top-0 z-10">
+                          <tr>
+                            <th className="text-sm">Date</th>
+                            <th className="text-sm">Time</th>
+                            <th className="text-sm">Room</th>
+                            <th className="text-sm">Floor</th>
+                            <th className="text-sm">Building</th>
+                            <th className="text-sm">Subject</th>
+                            <th className="text-sm">Year</th>
+                            <th className="text-sm">Section</th>
+                            <th className="text-sm">Assigned By</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {entries.map((entry, index) => (
+                            <tr
+                              key={entry._id}
+                              className={
+                                index % 2 === 0 ? "bg-gray-500" : "bg-gray-600"
+                              }
+                            >
+                              <td>
+                                {new Date(entry.date).toLocaleDateString()}
+                              </td>
+                              <td>
+                                <span>
+                                  {entry.timeStart} - {entry.timeEnd}
+                                </span>
+                              </td>
+                              <td>{entry.room}</td>
+                              <td>{entry.floor}</td>
+                              <td>{entry.building}</td>
+                              <td>{entry.subject}</td>
+                              <td>{entry.year}</td>
+                              <td>{entry.section}</td>
+                              <td className="text-sm text-white">
+                                {entry.assignedBy}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
