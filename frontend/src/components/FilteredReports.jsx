@@ -211,7 +211,7 @@ const FilteredReports = () => {
           </p>
         ) : Object.keys(groupedByProfessor).length > 0 ? (
           Object.entries(groupedByProfessor).map(([professor, entries]) => (
-            <div key={professor} className="mb-12">
+            <div key={professor} className="mb-4">
               <div id={`print-area-${professor}`} className="print-area">
                 <div className="card bg-slate-50 shadow-lg">
                   <div className="card-body">
@@ -229,17 +229,12 @@ const FilteredReports = () => {
                       </h2>
                     </div>
 
-                    <div className="flex items-center justify-between mb-6 border-b border-base-300 pb-2">
-                      <h2 className="text-xl font-bold text-black tracking-wide">
-                        Professor:
-                        <span className="text-primary ml-3">{professor}</span>
-                      </h2>
-
+                    <div className="flex items-center justify-between mb-6">
                       <button
                         onClick={() => handlePrintCard(professor)}
                         className="btn btn-outline btn-primary"
                       >
-                        🖨️
+                        🖨️ Print
                       </button>
                     </div>
                     <div className="overflow-x-auto">
@@ -253,7 +248,11 @@ const FilteredReports = () => {
                             <th className="text-sm">Building</th>
                             <th className="text-sm">Subject</th>
                             <th className="text-sm">Year</th>
-                            <th className="text-sm">Section</th>
+                            <th className="text-sm border-r border-white">
+                              Section
+                            </th>{" "}
+                            {/* Divider here */}
+                            <th className="text-sm">Professor</th>
                             <th className="text-sm">Assigned By</th>
                           </tr>
                         </thead>
@@ -278,7 +277,10 @@ const FilteredReports = () => {
                               <td>{entry.building}</td>
                               <td>{entry.subject}</td>
                               <td>{entry.year}</td>
-                              <td>{entry.section}</td>
+                              <td className="text-sm border-r border-white">
+                                {entry.section}
+                              </td>
+                              <td>{entry.professor}</td>
                               <td className="text-sm text-white">
                                 {entry.assignedBy}
                               </td>

@@ -10,6 +10,9 @@ const DisplayingEmployees = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const deans = employees.filter((emp) => emp.role === "Dean");
+  const instructors = employees.filter((emp) => emp.role === "Instructor");
+
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
@@ -32,23 +35,65 @@ const DisplayingEmployees = () => {
     <div className="min-h-screen bg-base-200 py-10">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-primary">Manage Employees</h1>
           <AddEmployee setEmployees={setEmployees} />
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full bg-base-100 rounded-lg shadow-md">
+        <div className="max-h-[500px] overflow-y-auto rounded-lg shadow-inner bg-gray-700 p-2 mb-2">
+          <h2 className="text-xl font-semibold text-white m-3">Deans</h2>
+          <table className="table table-zebra w-full bg-base-100 rounded-lg shadow-md mb-10">
             <thead className="bg-neutral text-neutral-content">
               <tr>
-                <th className="text-left">#</th>
-                <th className="text-left">Name</th>
-                <th className="text-left">Role</th>
-                <th className="text-left">Hiring Date</th>
-                <th className="text-left">Actions</th>
+                <th>#</th>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Hiring Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {employees.map((emp, index) => (
+              {deans.map((emp, index) => (
+                <tr key={emp._id}>
+                  <td>{index + 1}</td>
+                  <td>{emp.fullName}</td>
+                  <td>{emp.username || "—"}</td>
+                  <td>
+                    <b>
+                      {new Date(emp.hiringDate).toLocaleDateString("en-US")}
+                    </b>
+                  </td>
+                  <td>
+                    <div className="flex gap-2">
+                      <UpdateEmp
+                        empID={emp._id}
+                        empName={emp.fullName}
+                        empRole={emp.role}
+                        setEmployees={setEmployees}
+                      />
+                      <DeleteEmployee
+                        empID={emp._id}
+                        setEmployees={setEmployees}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="max-h-[500px] overflow-y-auto rounded-lg shadow-inner bg-gray-700 p-2">
+          <h2 className="text-xl font-semibold text-white m-3">Instructors</h2>
+          <table className="table table-zebra w-full bg-base-100 rounded-lg shadow-md">
+            <thead className="bg-neutral text-neutral-content">
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Hiring Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {instructors.map((emp, index) => (
                 <tr key={emp._id}>
                   <td>{index + 1}</td>
                   <td>{emp.fullName}</td>
@@ -58,8 +103,6 @@ const DisplayingEmployees = () => {
                       {new Date(emp.hiringDate).toLocaleDateString("en-US")}
                     </b>
                   </td>
-
-                  {/* Email removed from form, so placeholder here */}
                   <td>
                     <div className="flex gap-2">
                       <UpdateEmp

@@ -2,11 +2,17 @@ import React from "react";
 import logo from "../assets/CCA_LOGO.png";
 
 const Navbar = () => {
+  const loggedInDean = localStorage.getItem("loggedInDean");
+
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInDean");
+    window.location.href = "/";
+  };
+
   return (
     <header className="navbar bg-base-100 shadow-md px-4">
       {/* Left: Logo + Navigation */}
       <div className="flex items-center gap-6 flex-1">
-        {/* Logo */}
         <a
           href="/home"
           className="flex items-center gap-2 btn btn-ghost text-xl font-bold tracking-wide"
@@ -19,7 +25,6 @@ const Navbar = () => {
           CCA Dean Room Tracker
         </a>
 
-        {/* Navigation Links */}
         <nav className="hidden lg:flex">
           <ul className="menu menu-horizontal px-1 text-sm font-medium">
             <li>
@@ -35,14 +40,20 @@ const Navbar = () => {
         </nav>
       </div>
 
-      {/* Right: Logout */}
-      <div className="flex-none">
-        <a
-          href="/"
+      {/* Right: Dean Name + Logout */}
+      <div className="flex items-center gap-4 flex-none">
+        {loggedInDean && (
+          <span className="text-sm text-base-content font-medium">
+            Logged in as{" "}
+            <strong className="text-success">{loggedInDean}</strong>
+          </span>
+        )}
+        <button
+          onClick={handleLogout}
           className="text-red-600 hover:text-red-800 font-semibold text-sm px-4"
         >
           Logout
-        </a>
+        </button>
       </div>
 
       {/* Mobile Dropdown */}
@@ -77,12 +88,12 @@ const Navbar = () => {
             <a href="/employees">Employees</a>
           </li>
           <li>
-            <a
-              href="/"
-              className="text-red-600 hover:text-red-800 font-semibold"
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-800 font-semibold text-left w-full"
             >
               Logout
-            </a>
+            </button>
           </li>
         </ul>
       </div>

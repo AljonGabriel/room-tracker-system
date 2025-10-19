@@ -5,6 +5,10 @@ import toast from "react-hot-toast";
 const AddEmployee = ({ setEmployees }) => {
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState("");
+
+  const [username, setUsername] = useState("");
+  const [pwd, setPwd] = useState("");
+
   const [hiringDate, setHiringDate] = useState("");
 
   const handleSubmit = async (e) => {
@@ -19,6 +23,8 @@ const AddEmployee = ({ setEmployees }) => {
       const payload = {
         fullName,
         role,
+        username,
+        pwd,
         hiringDate,
       };
 
@@ -84,6 +90,37 @@ const AddEmployee = ({ setEmployees }) => {
                 <option value="Dean">Dean</option>
               </select>
             </div>
+
+            {role === "Dean" && (
+              <>
+                <div>
+                  <label className="label font-medium">Username</label>
+                  <input
+                    type="text"
+                    className="input input-bordered w-full"
+                    placeholder="John Doe"
+                    value={username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                    }}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Password</label>
+                  <input
+                    type="password"
+                    className="input input-bordered w-full"
+                    value={pwd}
+                    onChange={(e) => {
+                      setPwd(e.target.value);
+                    }}
+                    required
+                  />
+                </div>
+              </>
+            )}
 
             {/* Hiring Date */}
             <div>

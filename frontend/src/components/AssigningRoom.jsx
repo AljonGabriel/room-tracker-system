@@ -36,12 +36,13 @@ const AssigningRoom = () => {
     : null;
 
   // Fetch state
-  const [deanList, setDeanList] = useState([]);
   const [instructorList, setInstructorList] = useState([]);
 
   // Form state
 
-  const [selectedDean, setSelectedDean] = useState("");
+  const [selectedDean, setSelectedDean] = useState(() => {
+    return localStorage.getItem("loggedInDean") || "";
+  });
   const [selectedProfessor, setSelectedProfessor] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -56,6 +57,19 @@ const AssigningRoom = () => {
   //conditional
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const [isRepeating, setIsRepeating] = useState("No");
+
+  const resetForm = () => {
+    setSelectedProfessor("");
+    setSelectedYear("");
+    setSelectedSubject("");
+    setSelectedSection("");
+    setSelectedBuilding("");
+    setSelectedFloor("");
+    setSelectedRoom("");
+    setStartTime("");
+    setEndTime("");
+    setOccupiedTimes([]);
+  };
 
   // Derived values
   const buildings = Object.keys(buildingData);
@@ -128,6 +142,7 @@ const AssigningRoom = () => {
             year,
             subject,
             section,
+            assignedBy,
           }) =>
             getTimeRange(timeStart, timeEnd).map((slot) => ({
               _id,
@@ -142,6 +157,7 @@ const AssigningRoom = () => {
               year,
               subject,
               section,
+              assignedBy,
             }))
         );
 
@@ -165,22 +181,16 @@ const AssigningRoom = () => {
         );
         const allEmployees = res.data;
 
-        const deans = allEmployees
-          .filter((emp) => emp.role === "Dean")
-          .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
-
         const instructors = allEmployees
           .filter((emp) => emp.role === "Instructor")
           .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
 
-        setDeanList(deans);
         setInstructorList(instructors); // ✅ Add this state if needed
 
-        console.log("Deans:", deans);
         console.log("Instructors:", instructors);
       } catch (error) {
         console.error("❌ Failed to fetch employees", error);
-        setDeanList([]);
+
         setInstructorList([]);
       }
     };
@@ -211,7 +221,7 @@ const AssigningRoom = () => {
       assignedBy: selectedDean,
       repeating,
     };
-
+    console.log("Instructors:", instructorList);
     try {
       if (repeating) {
         const weekday = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ...
@@ -245,14 +255,7 @@ const AssigningRoom = () => {
         toast.success("✅ Room successfully assigned!");
       }
 
-      // Reset form
-      setStartTime("");
-      setEndTime("");
-      setSelectedBuilding("");
-      setSelectedFloor("");
-      setSelectedProfessor("");
-      setSelectedRoom("");
-      forceUpdate();
+      resetForm();
     } catch (err) {
       console.error("Error assigning room:", err);
       alert("❌ Failed to assign room. Please try again.");
@@ -305,22 +308,14 @@ const AssigningRoom = () => {
       <div className="flex items-center gap-4">
         <label className="font-medium w-32">Assigned by:</label>
         <select
-          className="select select-bordered flex-1"
+          className="select select-bordered flex-1 bg-base-200 cursor-not-allowed"
           value={selectedDean}
-          onChange={(e) => setSelectedDean(e.target.value)}
+          disabled
         >
-          <option disabled value="">
-            Select Dean
-          </option>
-          {deanList.map((dean) => (
-            <option key={dean.id} value={dean.fullName}>
-              {dean.fullName}
-            </option>
-          ))}
+          <option value={selectedDean}>{selectedDean}</option>
         </select>
       </div>
 
-      {/* Professor Dropdown */}
       <div className="flex items-center gap-4">
         <label className="font-medium w-32">Instructor:</label>
         <select
@@ -329,10 +324,10 @@ const AssigningRoom = () => {
           onChange={(e) => setSelectedProfessor(e.target.value)}
         >
           <option disabled value="">
-            Will teach by ?
+            Will teach by?
           </option>
           {instructorList.map((prof) => (
-            <option key={prof.id} value={prof.fullName}>
+            <option key={prof.id} value={prof.id}>
               {prof.fullName}
             </option>
           ))}
