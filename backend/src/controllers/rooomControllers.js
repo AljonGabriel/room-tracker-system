@@ -1,47 +1,44 @@
 import Room from "../models/Room.js";
+import mongoose from "mongoose";
 
 // GET /api/rooms?room=R201&date=2025-09-01
 export const getOccupiedRooms = async (req, res) => {
   try {
-    // Extract query parameters from the request
     const { room, date } = req.query;
 
-    // If either room or date is missing, return an empty array
     if (!room || !date) {
       return res.status(200).json([]);
     }
 
-    // Fetch all assignments for the specified date (across all rooms)
-    const allAssignments = await Room.find({ date });
+    // ✅ Populate professor to get full name and role
+    const allAssignments = await Room.find({ date }).populate(
+      "professor",
+      "fullName role"
+    );
 
-    // Log incoming query for debugging
     console.log("Incoming query:", room, date);
+    console.log("allAssignments", allAssignments);
 
-    // Map the results to a simplified structure for frontend use
     const occupiedRanges = allAssignments.map((entry) => ({
       _id: entry._id,
-      timeStart: entry.timeStart, // Start time of the booking
-      timeEnd: entry.timeEnd, // End time of the booking
-      professor: entry.professor, // Who's assigned
-      room: entry.room, // Room assigned
+      timeStart: entry.timeStart,
+      timeEnd: entry.timeEnd,
+      professor: entry.professor, // now an object with fullName + role
+      room: entry.room,
       year: entry.year,
       subject: entry.subject,
       section: entry.section,
-      building: entry.building, // Building info
-      floor: entry.floor, // Floor info
-      date: entry.date, // Floor info
+      building: entry.building,
+      floor: entry.floor,
+      date: entry.date,
+      assignedBy: entry.assignedBy,
     }));
 
-    // Log the full list of occupied ranges for visibility
     console.log("Occupied ranges (all rooms):", occupiedRanges);
 
-    // Return all time slots for the date, including cross-room professor conflicts
     return res.status(200).json(occupiedRanges);
   } catch (error) {
-    // Log any unexpected errors
     console.error("Error in getOccupiedRooms controller", error);
-
-    // Return a generic server error response
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -64,33 +61,24 @@ export const getFilteredSchedule = async (req, res) => {
       date: "date", // 'Date' input maps to 'date' field
     };
 
-    // Escape special characters for safe regex usage
-    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
     // Resolve the actual MongoDB field name
     const actualField =
       fieldMap[filterType?.toLowerCase()] || filterType?.toLowerCase();
 
     let query = {};
 
-    if (actualField && value) {
-      if (actualField === "date") {
-        // Parse incoming date string (e.g. '2025-09-01') into a Date object
-        const inputDate = new Date(value);
-        const startOfDay = new Date(inputDate.setHours(0, 0, 0, 0));
-        const endOfDay = new Date(inputDate.setHours(23, 59, 59, 999));
-
-        // Match any schedule within that full day
-        query.date = { $gte: startOfDay, $lte: endOfDay };
+    if (actualField === "date") {
+      // Date logic stays the same
+    } else if (actualField === "professor") {
+      // ✅ Validate before casting
+      if (mongoose.Types.ObjectId.isValid(value)) {
+        query[actualField] = new mongoose.Types.ObjectId(value);
       } else {
-        // Escape and trim the value, allowing optional trailing whitespace
-        const escapedValue = escapeRegex(value.trim());
-
-        // Build regex query for string fields
-        query[actualField] = {
-          $regex: new RegExp(`^${escapedValue}\\s*$`, "i"),
-        };
+        console.warn("❌ Invalid ObjectId:", value);
+        return res.status(400).json({ message: "Invalid instructor ID" });
       }
+    } else {
+      query[actualField] = value.trim();
     }
 
     // Debug logs for development
@@ -100,7 +88,7 @@ export const getFilteredSchedule = async (req, res) => {
     console.log("MongoDB query:", query);
 
     // Query the Room collection using the constructed filter
-    const schedule = await Room.find(query);
+    const schedule = await Room.find(query).populate("professor", "fullName");
 
     // Return the filtered schedule data
     res.status(200).json(schedule);

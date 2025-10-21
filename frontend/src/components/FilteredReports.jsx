@@ -10,8 +10,10 @@ const FilteredReports = () => {
   const [selectedFilter, setSelectedFilter] = useState("Instructor");
   const [selectedValue, setSelectedValue] = useState("");
 
-  console.log(selectedValue);
-  const buildingList = Object.keys(buildingData);
+  const [instructorsList, setInstructorList] = useState([]);
+  const [deansList, setDeansList] = useState([]);
+
+  console.log("selectedValue: ", selectedValue);
   useEffect(() => {
     if (!selectedValue) return;
 
@@ -25,9 +27,9 @@ const FilteredReports = () => {
           },
         });
         setSchedule(res.data);
-        console.log(res.data);
+        console.log("✅ Schedule loaded:", res.data);
       } catch (error) {
-        console.error("Failed to fetch schedule:", error);
+        console.error("❌ Failed to fetch schedule:", error);
       } finally {
         setLoading(false);
       }
@@ -36,13 +38,52 @@ const FilteredReports = () => {
     fetchSchedule();
   }, [selectedValue]);
 
-  // Group schedule entries by professor
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5001/api/employees/getemp"
+        );
+        const employees = res.data;
+
+        const instructors = employees
+          .filter((emp) => emp.role === "Instructor")
+          .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
+
+        setInstructorList(instructors); // ✅ Add this state if needed
+
+        const deans = employees
+          .filter((emp) => emp.role === "Dean")
+          .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
+
+        setDeansList(deans); // ✅ Add this state if needed
+
+        console.log("Instructors:", instructors);
+        console.log("Deans:", deans);
+      } catch (error) {
+        console.error("❌ Failed to fetch employees", error);
+
+        setInstructorList([]);
+      }
+    };
+
+    fetchEmployees();
+  }, []);
+
+  console.log("instructorsList:", instructorsList);
+  console.log("Type of instructorsList:", typeof instructorsList);
+  console.log("Is array:", Array.isArray(instructorsList));
+
+  const buildingList = Object.keys(buildingData);
+
   const groupedByProfessor = schedule.reduce((acc, entry) => {
-    const prof = entry.professor || "Unassigned";
-    if (!acc[prof]) acc[prof] = [];
-    acc[prof].push(entry);
+    const key = entry.professor;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(entry);
     return acc;
   }, {});
+
+  console.log("groupedByProfessor filtered reports: ", groupedByProfessor);
 
   const handlePrintCard = (professor) => {
     const printArea = document.getElementById(`print-area-${professor}`);
@@ -112,11 +153,15 @@ const FilteredReports = () => {
               onChange={(e) => setSelectedValue(e.target.value)}
             >
               <option value="">Select Instructor</option>
-              {professorList.map((prof) => (
-                <option key={prof} value={prof}>
-                  {prof}
-                </option>
-              ))}
+              {Array.isArray(instructorsList) && instructorsList.length > 0 ? (
+                instructorsList.map((prof) => (
+                  <option key={prof.id} value={prof.id}>
+                    {prof.fullName}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No instructors found</option>
+              )}
             </select>
           )}
 
@@ -127,11 +172,15 @@ const FilteredReports = () => {
               onChange={(e) => setSelectedValue(e.target.value)}
             >
               <option value="">Select Dean</option>
-              {deanList.map((dean) => (
-                <option key={dean} value={dean}>
-                  {dean}
-                </option>
-              ))}
+              {Array.isArray(instructorsList) && instructorsList.length > 0 ? (
+                deansList.map((dean) => (
+                  <option key={dean.id} value={dean.fullName}>
+                    {dean.fullName}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No instructors found</option>
+              )}
             </select>
           )}
 
@@ -250,42 +299,54 @@ const FilteredReports = () => {
                             <th className="text-sm">Year</th>
                             <th className="text-sm border-r border-white">
                               Section
-                            </th>{" "}
-                            {/* Divider here */}
+                            </th>
                             <th className="text-sm">Professor</th>
                             <th className="text-sm">Assigned By</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {entries.map((entry, index) => (
-                            <tr
-                              key={entry._id}
-                              className={
-                                index % 2 === 0 ? "bg-gray-500" : "bg-gray-600"
-                              }
-                            >
-                              <td>
-                                {new Date(entry.date).toLocaleDateString()}
-                              </td>
-                              <td>
-                                <span>
-                                  {entry.timeStart} - {entry.timeEnd}
-                                </span>
-                              </td>
-                              <td>{entry.room}</td>
-                              <td>{entry.floor}</td>
-                              <td>{entry.building}</td>
-                              <td>{entry.subject}</td>
-                              <td>{entry.year}</td>
-                              <td className="text-sm border-r border-white">
-                                {entry.section}
-                              </td>
-                              <td>{entry.professor}</td>
-                              <td className="text-sm text-white">
-                                {entry.assignedBy}
+                          {Array.isArray(entries) ? (
+                            entries.map((entry, index) => (
+                              <tr
+                                key={entry._id}
+                                className={
+                                  index % 2 === 0
+                                    ? "bg-gray-500"
+                                    : "bg-gray-600"
+                                }
+                              >
+                                <td>
+                                  {new Date(entry.date).toLocaleDateString()}
+                                </td>
+                                <td>
+                                  <span>
+                                    {entry.timeStart} - {entry.timeEnd}
+                                  </span>
+                                </td>
+                                <td>{entry.room}</td>
+                                <td>{entry.floor}</td>
+                                <td>{entry.building}</td>
+                                <td>{entry.subject}</td>
+                                <td>{entry.year}</td>
+                                <td className="text-sm border-r border-white">
+                                  {entry.section}
+                                </td>
+                                <td>{entry.professor?.fullName}</td>
+                                <td className="text-sm text-white">
+                                  {entry.assignedBy}
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan="10"
+                                className="text-center text-white bg-red-500"
+                              >
+                                ⚠️ Invalid data — entries is not an array
                               </td>
                             </tr>
-                          ))}
+                          )}
                         </tbody>
                       </table>
                     </div>

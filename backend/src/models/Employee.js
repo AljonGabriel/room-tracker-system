@@ -10,8 +10,15 @@ const employeeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    username: {
+      type: String,
+    },
+    pwd: {
+      type: String,
+    },
     hiringDate: {
       type: Date,
+      required: true,
     },
   },
   {

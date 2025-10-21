@@ -72,16 +72,13 @@ const OccupiedTimeLogs = ({
 
       {/* Grouped Slot Display */}
       <div className="mt-4 max-h-96 overflow-y-auto space-y-1">
-        {Object.entries(groupedByProfessor).map(([professorObj, slots]) => {
-          const name =
-            typeof professorObj === "object"
-              ? professorObj.fullName
-              : professorObj;
-          const profId =
-            typeof professorObj === "object" ? professorObj._id : professorObj;
-          const { border } = getColorClass(name || "Unknown");
+        {Object.entries(groupedByProfessor).map(([profId, group]) => {
+          const professor = group?.professor;
+          const slots = Array.isArray(group?.slots) ? group.slots : [];
 
-          // Deduplicate by time range
+          const name = professor?.fullName || "Unknown";
+          const { border } = getColorClass(name);
+
           const uniqueSlots = slots.filter((slot, index, self) => {
             return (
               self.findIndex(
@@ -93,96 +90,78 @@ const OccupiedTimeLogs = ({
             );
           });
 
-          console.log("Unique Slots:", uniqueSlots);
-          console.log("name.fullName:", profId); // ✅ shows "Prof John Doe"
-
           return (
             <div
               key={profId}
               className={`border-2 rounded p-4 bg-neutral text-neutral-content ${border}`}
             >
-              <div className="mb-2 text-md font-bold">{name || "Unknown"}</div>
+              <div className="mb-2 text-md font-bold">{name}</div>
 
               <div className="space-y-2">
-                {uniqueSlots.map(
-                  (
-                    {
-                      _id,
-                      timeStart,
-                      timeEnd,
-                      room,
-                      floor,
-                      building,
-                      date,
-                      year,
-                      subject,
-                      section,
-                      assignedBy,
-                      professor,
-                    },
-                    index
-                  ) => (
-                    <div
-                      key={_id || index}
-                      className="bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center"
-                    >
-                      <div className="text-sm">
-                        <strong>{timeStart}</strong>–<strong>{timeEnd}</strong>{" "}
-                        | Room <strong>{room}</strong>, Floor{" "}
-                        <strong>{floor}</strong>, {building} |{" "}
-                        {new Date(date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </div>
-                      {loggedInDean === assignedBy ? (
-                        <div className="flex gap-2">
-                          <UpdateModal
-                            prevSelectedFloor={floor}
-                            room={room}
-                            selectedDate={selectedDate}
-                            prevSelectedBuilding={building}
-                            prevSelectedYear={year}
-                            prevSelectedSubject={subject}
-                            prevSelectedSection={section}
-                            buildingData={buildingData}
-                            prevSelectedProff={professor?.fullName || "Unknown"}
-                            selectedDean={selectedDean}
-                            id={_id}
-                            timeStart={timeStart}
-                            timeEnd={timeEnd}
-                            timeSlots={timeSlots}
-                            occupiedTimes={occupiedTimes}
-                            forceUpdate={forceUpdate}
-                            subjectsByYear={subjectsByYear}
-                            sections={sections}
-                          />
-                          <button
-                            className="btn btn-sm btn-warning"
-                            onClick={() =>
-                              handleDelete({
-                                _id,
-                                timeStart,
-                                timeEnd,
-                                room,
-                                floor,
-                                building,
-                                professor,
-                              })
-                            }
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      ) : (
-                        <span>
-                          Assigned by: <strong>{assignedBy}</strong>
-                        </span>
-                      )}
+                {uniqueSlots.map((slot, index) => (
+                  <div
+                    key={slot._id || index}
+                    className="bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center"
+                  >
+                    <div>
+                      <strong>{slot.timeStart}</strong>–
+                      <strong>{slot.timeEnd}</strong> | Room{" "}
+                      <strong>{slot.room}</strong>, Floor{" "}
+                      <strong>{slot.floor}</strong>, {slot.building} |{" "}
+                      {new Date(slot.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </div>
-                  )
-                )}
+                    {loggedInDean === slot.assignedBy ? (
+                      <div className="flex gap-2">
+                        <UpdateModal
+                          prevSelectedFloor={slot.floor}
+                          room={slot.room}
+                          selectedDate={selectedDate}
+                          prevSelectedBuilding={slot.building}
+                          prevSelectedYear={slot.year}
+                          prevSelectedSubject={slot.subject}
+                          prevSelectedSection={slot.section}
+                          buildingData={buildingData}
+                          prevSelectedProff={
+                            slot.professor?.fullName || "Unknown"
+                          }
+                          selectedDean={selectedDean}
+                          id={slot._id}
+                          timeStart={slot.timeStart}
+                          timeEnd={slot.timeEnd}
+                          timeSlots={timeSlots}
+                          occupiedTimes={occupiedTimes}
+                          forceUpdate={forceUpdate}
+                          subjectsByYear={subjectsByYear}
+                          sections={sections}
+                        />
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() =>
+                            handleDelete({
+                              _id: slot._id,
+                              timeStart: slot.timeStart,
+                              timeEnd: slot.timeEnd,
+                              room: slot.room,
+                              floor: slot.floor,
+                              building: slot.building,
+                              professor: slot.professor,
+                            })
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : (
+                      <span>
+                        Assigned by: <strong>{slot.assignedBy}</strong>
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           );

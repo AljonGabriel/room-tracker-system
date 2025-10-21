@@ -11,7 +11,7 @@ export const getEmp = async (req, res) => {
 };
 
 export const addEmp = async (req, res) => {
-  const { fullName, role, hiringDate } = req.body;
+  const { fullName, role, username, pwd, hiringDate } = req.body;
 
   if (!fullName || !role || !hiringDate) {
     return res.status(400).json({ message: "Missing required fields" });
@@ -21,6 +21,8 @@ export const addEmp = async (req, res) => {
     const newEmployee = new Employee({
       fullName,
       role,
+      username,
+      pwd,
       hiringDate,
     });
 

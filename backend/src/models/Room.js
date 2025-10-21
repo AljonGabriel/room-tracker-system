@@ -42,8 +42,9 @@ const roomSchema = new mongoose.Schema(
       required: true,
     },
     professor: {
-      type: String,
-      required: true, // ✅ Fixed typo: was "Required"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employees", // or whatever your model name is
+      required: true,
     },
     assignedBy: {
       type: String,

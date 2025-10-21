@@ -98,8 +98,14 @@ const AssigningRoom = () => {
   })();
 
   const groupedByProfessor = occupiedTimes.reduce((acc, entry) => {
-    if (!acc[entry.professor]) acc[entry.professor] = [];
-    acc[entry.professor].push(entry);
+    const profId = entry.professor._id;
+    if (!acc[profId]) {
+      acc[profId] = {
+        professor: entry.professor,
+        slots: [],
+      };
+    }
+    acc[profId].slots.push(entry);
     return acc;
   }, {});
 
@@ -568,9 +574,13 @@ const AssigningRoom = () => {
 
                 let label = `${slot}`;
                 if (isOccupied) {
-                  label += ` ${conflict.professor} • ${conflict.room} • ${conflict.building}`;
+                  label += ` ${conflict.professor?.fullName || "Unknown"} • ${
+                    conflict.room
+                  } • ${conflict.building}`;
                   if (nextConflict) {
-                    label += ` → Next: ${nextConflict.professor} (${nextConflict.timeStart}–${nextConflict.timeEnd})`;
+                    label += ` → Next: ${
+                      nextConflict.professor?.fullName || "Unknown"
+                    } (${nextConflict.timeStart}–${nextConflict.timeEnd})`;
                   }
                   label += ".";
                 }
@@ -611,7 +621,9 @@ const AssigningRoom = () => {
 
                 let label = slot;
                 if (isOccupied && conflict) {
-                  label += ` ${conflict.professor} • ${conflict.room} • ${conflict.building}`;
+                  label += ` ${conflict.professor?.fullName || "Unknown"} • ${
+                    conflict.room
+                  } • ${conflict.building}`;
                 }
 
                 return (
