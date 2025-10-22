@@ -58,64 +58,6 @@ const AssigningRoom = () => {
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const [isRepeating, setIsRepeating] = useState("No");
 
-  const resetForm = () => {
-    setSelectedProfessor("");
-    setSelectedYear("");
-    setSelectedSubject("");
-    setSelectedSection("");
-    setSelectedBuilding("");
-    setSelectedFloor("");
-    setSelectedRoom("");
-    setStartTime("");
-    setEndTime("");
-    setOccupiedTimes([]);
-  };
-
-  // Derived values
-  const buildings = Object.keys(buildingData);
-  const floors = selectedBuilding
-    ? Object.keys(buildingData[selectedBuilding])
-    : [];
-  const rooms = selectedFloor
-    ? buildingData[selectedBuilding][selectedFloor]
-    : [];
-  const timeSlots = generateTimeSlots();
-
-  const navigate = useNavigate();
-
-  const colors = colorPalette;
-
-  // Assign a consistent color to each unique name using a cache
-  const getColorClass = (() => {
-    const cache = {};
-    return (name) => {
-      if (!cache[name]) {
-        const index = Object.keys(cache).length % colors.length;
-        cache[name] = colors[index];
-      }
-      return cache[name];
-    };
-  })();
-
-  const groupedByProfessor = occupiedTimes.reduce((acc, entry) => {
-    const profId = entry.professor._id;
-    if (!acc[profId]) {
-      acc[profId] = {
-        professor: entry.professor,
-        slots: [],
-      };
-    }
-    acc[profId].slots.push(entry);
-    return acc;
-  }, {});
-
-  const uniqueProfessors = Array.from(
-    new Set(occupiedTimes.map((entry) => entry.professor))
-  );
-
-  // Year and subject toggle
-  const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
-
   useEffect(() => {
     const controller = new AbortController();
 
@@ -208,6 +150,64 @@ const AssigningRoom = () => {
       controller.abort(); // ✅ cancel request if room changes quickly
     };
   }, [ignored, selectedRoom]);
+
+  const resetForm = () => {
+    setSelectedProfessor("");
+    setSelectedYear("");
+    setSelectedSubject("");
+    setSelectedSection("");
+    setSelectedBuilding("");
+    setSelectedFloor("");
+    setSelectedRoom("");
+    setStartTime("");
+    setEndTime("");
+    setOccupiedTimes([]);
+  };
+
+  // Derived values
+  const buildings = Object.keys(buildingData);
+  const floors = selectedBuilding
+    ? Object.keys(buildingData[selectedBuilding])
+    : [];
+  const rooms = selectedFloor
+    ? buildingData[selectedBuilding][selectedFloor]
+    : [];
+  const timeSlots = generateTimeSlots();
+
+  const navigate = useNavigate();
+
+  const colors = colorPalette;
+
+  // Assign a consistent color to each unique name using a cache
+  const getColorClass = (() => {
+    const cache = {};
+    return (name) => {
+      if (!cache[name]) {
+        const index = Object.keys(cache).length % colors.length;
+        cache[name] = colors[index];
+      }
+      return cache[name];
+    };
+  })();
+
+  const groupedByProfessor = occupiedTimes.reduce((acc, entry) => {
+    const profId = entry.professor._id;
+    if (!acc[profId]) {
+      acc[profId] = {
+        professor: entry.professor,
+        slots: [],
+      };
+    }
+    acc[profId].slots.push(entry);
+    return acc;
+  }, {});
+
+  const uniqueProfessors = Array.from(
+    new Set(occupiedTimes.map((entry) => entry.professor))
+  );
+
+  // Year and subject toggle
+  const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
 
   // Submit assignment to backend
   const handleAssignRoom = async () => {
@@ -510,10 +510,7 @@ const AssigningRoom = () => {
                   const entryDateStr = new Date(entry.date).toLocaleDateString(
                     "en-CA"
                   );
-                  return (
-                    entry.room === selectedRoom &&
-                    entryDateStr === selectedDateStr
-                  );
+                  return entryDateStr === selectedDateStr;
                 });
 
                 // Check if selectedStart is inside any occupied range (excluding exact end match)
@@ -615,7 +612,7 @@ const AssigningRoom = () => {
               </option>
               {timeSlots.map((slot) => {
                 const conflict = occupiedTimes.find(
-                  (entry) => entry.slot === slot && entry.room === selectedRoom
+                  (entry) => entry.slot === slot
                 );
                 const isOccupied = !!conflict;
 
@@ -626,13 +623,15 @@ const AssigningRoom = () => {
                   } • ${conflict.building}`;
                 }
 
+                const isSameAsStart = slot === startTime;
+
                 return (
                   <option
                     key={slot}
                     value={slot}
-                    disabled={isOccupied}
+                    disabled={isOccupied || isSameAsStart}
                     className={
-                      isOccupied
+                      isOccupied || isSameAsStart
                         ? "bg-neutral text-neutral-content text-sm"
                         : "text-sm text-base-content"
                     }
@@ -643,20 +642,20 @@ const AssigningRoom = () => {
               })}
             </select>
           </div>
-          <OccupiedTimeLogs
-            groupedByProfessor={groupedByProfessor}
-            uniqueProfessors={uniqueProfessors}
-            getColorClass={getColorClass}
-            selectedDean={selectedDean}
-            timeSlots={timeSlots}
-            occupiedTimes={occupiedTimes}
-            selectedDate={selectedDate}
-            forceUpdate={forceUpdate}
-            subjectsByYear={subjectsByYear}
-            sections={sections}
-          />
         </>
       )}
+      <OccupiedTimeLogs
+        groupedByProfessor={groupedByProfessor}
+        uniqueProfessors={uniqueProfessors}
+        getColorClass={getColorClass}
+        selectedDean={selectedDean}
+        timeSlots={timeSlots}
+        occupiedTimes={occupiedTimes}
+        selectedDate={selectedDate}
+        forceUpdate={forceUpdate}
+        subjectsByYear={subjectsByYear}
+        sections={sections}
+      />
 
       {/* Summary Display */}
       {selectedDean &&

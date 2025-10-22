@@ -51,7 +51,7 @@ const UpdateModal = ({
     ? subjectsByYear[updateSelectedYear]
     : [];
 
-  const handleCancelUpdate = () => {
+  const resetForms = () => {
     setUpdateSelectedYear("");
     setUpdateSelectedSection("");
     setUpdateSelectedSubject("");
@@ -60,7 +60,10 @@ const UpdateModal = ({
     setUpdateSelectedRoom("");
     setUpdateStartTime("");
     setUpdateEndTime("");
+  };
 
+  const handleCancelUpdate = () => {
+    resetForms();
     const modal = document.getElementById(`update-modal-${prevSelectedProff}`);
     if (modal) modal.checked = false;
   };
@@ -117,11 +120,10 @@ const UpdateModal = ({
 
               // Prepare payload
               const payload = {
-                professor: prevSelectedProff,
                 year: updateSelectedYear || prevSelectedYear,
                 section: updateSelectedSection || prevSelectedSection,
                 subject: updateSelectedSubject || prevSelectedSubject,
-                building: updateSelectedBuilding || prevSelectedSubject,
+                building: updateSelectedBuilding || prevSelectedBuilding,
                 floor: updateSelectedFloor || prevSelectedFloor,
                 room: updateSelectedRoom || prevSelectedRoom,
                 timeStart: updateStartTime || timeStart,
@@ -141,6 +143,7 @@ const UpdateModal = ({
                   `update-modal-${prevSelectedProff}`
                 ).checked = false;
                 forceUpdate();
+                resetForms();
               } catch (error) {
                 console.error("Update failed:", error);
                 toast.error("❌ Failed to update schedule. Please try again.");
@@ -334,6 +337,7 @@ const UpdateModal = ({
                   {rooms.map((room) => (
                     <button
                       key={room}
+                      type="button"
                       className={`btn btn-sm w-full ${
                         updateSelectedRoom === room
                           ? "btn-primary"
@@ -383,7 +387,7 @@ const UpdateModal = ({
 
                     let label = `${slot}`;
                     if (isOccupied) {
-                      label += ` — Instructor: ${conflict.professor} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
+                      label += ` — Instructor: ${conflict.professor.fullName} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
                       if (nextConflict) {
                         label += ` — then ${nextConflict.professor} from ${nextConflict.timeStart} to ${nextConflict.timeEnd}`;
                       }
