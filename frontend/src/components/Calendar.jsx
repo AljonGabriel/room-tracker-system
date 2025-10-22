@@ -18,6 +18,15 @@ const Calendar = ({ onDateSelect }) => {
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
+  const isPastDate = (year, month, day) => {
+    const today = new Date();
+    const target = new Date(year, month, day);
+    // Remove time component for clean comparison
+    today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
+    return target < today;
+  };
+
   const goToPreviousMonth = () => {
     const prev = new Date(currentYear, currentMonth - 1, 1);
     setViewDate(prev);
@@ -60,22 +69,36 @@ const Calendar = ({ onDateSelect }) => {
 
         {/* Calendar cells */}
         <div className="grid grid-cols-7 gap-2 mt-2">
-          {calendarCells.map((day, index) =>
-            day ? (
+          {calendarCells.map((day, index) => {
+            if (!day) return <div key={index}></div>;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const cellDate = new Date(currentYear, currentMonth, day);
+            cellDate.setHours(0, 0, 0, 0);
+
+            const isPast = cellDate < today;
+
+            return (
               <button
                 key={index}
-                className="btn btn-sm btn-outline hover:btn-primary"
+                className={`btn btn-sm ${
+                  isPast
+                    ? "btn-disabled text-gray-400 bg-gray-200 cursor-not-allowed"
+                    : "btn-outline hover:btn-primary"
+                }`}
+                disabled={isPast}
                 onClick={() => {
-                  const selected = new Date(currentYear, currentMonth, day);
-                  onDateSelect(selected);
+                  if (!isPast) {
+                    onDateSelect(cellDate);
+                  }
                 }}
               >
                 {day}
               </button>
-            ) : (
-              <div key={index}></div>
-            )
-          )}
+            );
+          })}
         </div>
       </div>
     </div>

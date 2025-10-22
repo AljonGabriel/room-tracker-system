@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import buildingData from "../data/buildingData";
-import { deanList, professorList } from "../data/userLists";
 import subjectsByYear from "../data/subjectsByYear.js";
+import sections from "../data/sections.js";
 
 const FilteredReports = () => {
   const [schedule, setSchedule] = useState([]);
@@ -12,6 +12,7 @@ const FilteredReports = () => {
 
   const [instructorsList, setInstructorList] = useState([]);
   const [deansList, setDeansList] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("");
 
   console.log("selectedValue: ", selectedValue);
   useEffect(() => {
@@ -75,6 +76,8 @@ const FilteredReports = () => {
   console.log("Is array:", Array.isArray(instructorsList));
 
   const buildingList = Object.keys(buildingData);
+
+  const subjectList = selectedYear ? subjectsByYear[selectedYear] || [] : [];
 
   const groupedByProfessor = schedule.reduce((acc, entry) => {
     const key = entry.professor;
@@ -209,18 +212,35 @@ const FilteredReports = () => {
           )}
 
           {selectedFilter === "Subject" && (
-            <select
-              className="select select-bordered w-full max-w-xs"
-              value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Subject</option>
-              {subjectList.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-            </select>
+            <>
+              <select
+                className="select select-bordered w-full max-w-xs mb-4"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+              >
+                <option value="">Select Year</option>
+                {Object.keys(subjectsByYear).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+
+              {selectedYear && (
+                <select
+                  className="select select-bordered w-full max-w-xs"
+                  value={selectedValue}
+                  onChange={(e) => setSelectedValue(e.target.value)}
+                >
+                  <option value="">Select Subject</option>
+                  {subjectList.map((subject) => (
+                    <option key={subject} value={subject}>
+                      {subject}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </>
           )}
 
           {selectedFilter === "Year" && (
@@ -245,7 +265,7 @@ const FilteredReports = () => {
               onChange={(e) => setSelectedValue(e.target.value)}
             >
               <option value="">Select Section</option>
-              {sectionList.map((section) => (
+              {sections.map((section) => (
                 <option key={section} value={section}>
                   {section}
                 </option>
