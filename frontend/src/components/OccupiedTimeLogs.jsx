@@ -2,7 +2,8 @@ import axios from "axios";
 import { useState } from "react";
 import buildingData from "../data/buildingData";
 import toast from "react-hot-toast";
-import UpdateModal from "./UpdateModal";
+import UpdateSchedule from "./UpdateSchedule";
+import DelSchedule from "./DelSchedule";
 
 const OccupiedTimeLogs = ({
   groupedByProfessor,
@@ -10,42 +11,14 @@ const OccupiedTimeLogs = ({
   getColorClass,
   selectedDean,
   selectedDate,
-  forceUpdate,
   occupiedTimes,
   timeSlots,
   subjectsByYear,
   sections,
-  setOccupiedTimes
+  setOccupiedTimes,
+ 
 }) => {
   const loggedInDean = localStorage.getItem("loggedInDean");
-
-  console.log("selectedDate in OccupiedTimeLogs:", selectedDate);
-
-  const handleDelete = async (entry) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete the schedule for ${
-        entry.professor?.fullName || "Unknown"
-      } from ${entry.timeStart} to ${entry.timeEnd}?`
-    );
-    console.log("entry", entry);
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(
-        `http://localhost:5001/api/rooms/occupiedTime/${entry._id}`
-      );
-      toast.success(
-        `Successfully deleted the schedule for ${
-          entry.professor?.fullName || "Unknown"
-        }`
-      );
-      forceUpdate(); // Refresh data
-    } catch (error) {
-      console.error("Bulk delete failed:", error);
-      toast.error("Bulk delete failed. Please try again.");
-    }
-  };
-
   return (
     <div>
       <h4 className="font-semibold text-md text-base-content my-3">
@@ -119,7 +92,7 @@ const OccupiedTimeLogs = ({
                     </div>
                     {loggedInDean === slot.assignedBy ? (
                       <div className="flex gap-2">
-                        <UpdateModal
+                        <UpdateSchedule
                           prevSelectedFloor={slot.floor}
                           room={slot.room}
                           selectedDate={selectedDate}
@@ -140,23 +113,9 @@ const OccupiedTimeLogs = ({
                           setOccupiedTimes={setOccupiedTimes}
                           subjectsByYear={subjectsByYear}
                           sections={sections}
+                          
                         />
-                        <button
-                          className="btn btn-sm btn-warning"
-                          onClick={() =>
-                            handleDelete({
-                              _id: slot._id,
-                              timeStart: slot.timeStart,
-                              timeEnd: slot.timeEnd,
-                              room: slot.room,
-                              floor: slot.floor,
-                              building: slot.building,
-                              professor: slot.professor,
-                            })
-                          }
-                        >
-                          Delete
-                        </button>
+                      <DelSchedule />
                       </div>
                     ) : (
                       <span>
