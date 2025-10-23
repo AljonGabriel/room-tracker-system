@@ -2,34 +2,39 @@ import React from 'react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const DelSchedule = () => {
-  const handleDelete = async (entry) => {
+const DelSchedule = ({ scheduledID, assignedProf, updateOccupiedTimes }) => {
+  const handleDelete = async () => {
     const confirmed = window.confirm(
       `Are you sure you want to delete the schedule for ${
-        entry.professor?.fullName || 'Unknown'
-      } from ${entry.timeStart} to ${entry.timeEnd}?`,
+        assignedProf || 'Unknown'
+      }?`,
     );
-    console.log('entry', entry);
+
     if (!confirmed) return;
 
     try {
       await axios.delete(
-        `http://localhost:5001/api/rooms/occupiedTime/${entry._id}`,
+        `http://localhost:5001/api/rooms/occupiedTime/${scheduledID}`,
       );
       toast.success(
-        `Successfully deleted the schedule for ${
-          entry.professor?.fullName || 'Unknown'
-        }`,
+        `Successfully deleted the schedule for ${assignedProf || 'Unknown'}`,
+      );
+      // ✅ Update the state to remove the deleted item
+      updateOccupiedTimes((prev) =>
+        prev.filter((entry) => entry._id !== scheduledID),
       );
     } catch (error) {
-      console.error('Bulk delete failed:', error);
-      toast.error('Bulk delete failed. Please try again.');
+      console.error('Delete failed:', error);
+      toast.error('❌ Failed to delete schedule. Please try again.');
     }
   };
+
   return (
-    <>
-      <button className='btn btn-sm btn-warning'>Delete</button>
-    </>
+    <button
+      className='btn btn-sm btn-warning'
+      onClick={handleDelete}>
+      Delete
+    </button>
   );
 };
 
