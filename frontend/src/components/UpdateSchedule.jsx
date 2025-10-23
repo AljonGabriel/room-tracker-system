@@ -40,8 +40,6 @@ const UpdateSchedule = ({
     ? Object.keys(buildingData[updateSelectedBuilding])
     : [];
 
-  const dateStr = selectedDate.toLocaleDateString('en-CA');
-
   const rooms = updateSelectedFloor
     ? buildingData[updateSelectedBuilding][updateSelectedFloor]
     : [];
@@ -136,10 +134,7 @@ const UpdateSchedule = ({
     };
 
     try {
-      const res = await axios.put(
-        `http://localhost:5001/api/rooms/${id}`,
-        payload,
-      );
+      await axios.put(`http://localhost:5001/api/rooms/${id}`, payload);
 
       const updatedRecord = {
         ...payload,

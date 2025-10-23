@@ -17,9 +17,11 @@ const OccupiedTimeLogs = ({
   const loggedInDean = localStorage.getItem('loggedInDean');
   return (
     <div>
-      <h4 className='font-semibold text-md text-base-content my-3'>
-        Occupied Time Slots:
-      </h4>
+      <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 my-4'>
+        <h4 className='font-semibold text-lg text-base-content'>
+          📌 Occupied Time Slots
+        </h4>
+      </div>
 
       {/* Legend */}
       <div className='mb-4 flex flex-wrap gap-4 items-center'>
