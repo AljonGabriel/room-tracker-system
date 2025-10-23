@@ -19,7 +19,7 @@ const UpdateModal = ({
   timeStart,
   timeSlots,
   occupiedTimes,
-  forceUpdate,
+  setOccupiedTimes,
   subjectsByYear,
   sections,
 }) => {
@@ -68,6 +68,95 @@ const UpdateModal = ({
     if (modal) modal.checked = false;
   };
 
+  const handleScheduleUpdate = async ({
+  e,
+  id,
+  occupiedTimes,
+  setOccupiedTimes,
+  prevSelectedProff,
+  updateStartTime,
+  updateEndTime,
+  updateSelectedYear,
+  updateSelectedSection,
+  updateSelectedSubject,
+  updateSelectedBuilding,
+  updateSelectedFloor,
+  updateSelectedRoom,
+  timeStart,
+  timeEnd,
+  prevSelectedYear,
+  prevSelectedSection,
+  prevSelectedSubject,
+  prevSelectedBuilding,
+  prevSelectedFloor,
+  prevSelectedRoom,
+  selectedDean,
+  selectedDate,
+  resetForms,
+}) => {
+  e.preventDefault();
+
+  if (!selectedDate) {
+    toast.error("❌ No date selected.");
+    return;
+  }
+
+  const dateStr = selectedDate.toLocaleDateString("en-CA");
+
+  // ✅ Conflict check
+  const hasConflictWithOthers = occupiedTimes.some((entry) => {
+    if (entry._id === id) return false;
+
+    return (
+      entry.professor !== prevSelectedProff &&
+      updateStartTime < entry.timeEnd &&
+      updateEndTime > entry.timeStart
+    );
+  });
+
+  if (hasConflictWithOthers) {
+    toast.error("Selected time range overlaps with another Instructor schedule.");
+    return;
+  }
+
+  // ✅ Prepare payload
+  const payload = {
+    year: updateSelectedYear || prevSelectedYear,
+    section: updateSelectedSection || prevSelectedSection,
+    subject: updateSelectedSubject || prevSelectedSubject,
+    building: updateSelectedBuilding || prevSelectedBuilding,
+    floor: updateSelectedFloor || prevSelectedFloor,
+    room: updateSelectedRoom || prevSelectedRoom,
+    timeStart: updateStartTime || timeStart,
+    timeEnd: updateEndTime || timeEnd,
+    date: dateStr,
+    assignedBy: selectedDean,
+  };
+
+  try {
+    const res = await axios.put(`http://localhost:5001/api/rooms/${id}`, payload);
+
+    const updatedRecord = {
+      ...payload,
+      _id: id,
+      slot: `${payload.timeStart}–${payload.timeEnd}`,
+      professor: occupiedTimes.find((entry) => entry._id === id)?.professor,
+    };
+
+    // ✅ Update occupiedTimes directly
+    setOccupiedTimes((prev) =>
+      prev.map((entry) => (entry._id === id ? updatedRecord : entry))
+    );
+
+    toast.success("✅ Schedule updated successfully!");
+    document.getElementById(`update-modal-${prevSelectedProff}`).checked = false;
+    resetForms();
+  } catch (error) {
+    console.error("Update failed:", error);
+    toast.error("❌ Failed to update schedule. Please try again.");
+  }
+};
+
   return (
     <>
       <button
@@ -97,58 +186,34 @@ const UpdateModal = ({
           </h3>
 
           <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-
-              // Check for time conflicts with other professors
-              const hasConflictWithOthers = occupiedTimes.some((entry) => {
-                if (entry._id === id) return false;
-
-                return (
-                  entry.professor !== prevSelectedProff &&
-                  updateStartTime < entry.timeEnd &&
-                  updateEndTime > entry.timeStart
-                );
-              });
-
-              if (hasConflictWithOthers) {
-                toast.error(
-                  "Selected time range overlaps with another Instructor schedule."
-                );
-                return;
-              }
-
-              // Prepare payload
-              const payload = {
-                year: updateSelectedYear || prevSelectedYear,
-                section: updateSelectedSection || prevSelectedSection,
-                subject: updateSelectedSubject || prevSelectedSubject,
-                building: updateSelectedBuilding || prevSelectedBuilding,
-                floor: updateSelectedFloor || prevSelectedFloor,
-                room: updateSelectedRoom || prevSelectedRoom,
-                timeStart: updateStartTime || timeStart,
-                timeEnd: updateEndTime || timeEnd,
-                date: dateStr,
-              };
-
-              try {
-                const res = await axios.put(
-                  `http://localhost:5001/api/rooms/${id}`,
-                  payload
-                );
-
-                console.log("Update successful:", res.data);
-                toast.success("✅ Schedule updated successfully!");
-                document.getElementById(
-                  `update-modal-${prevSelectedProff}`
-                ).checked = false;
-                forceUpdate();
-                resetForms();
-              } catch (error) {
-                console.error("Update failed:", error);
-                toast.error("❌ Failed to update schedule. Please try again.");
-              }
-            }}
+            onSubmit={(e) =>
+            handleScheduleUpdate({
+              e,
+              id,
+              occupiedTimes,
+              setOccupiedTimes,
+              prevSelectedProff,
+              updateStartTime,
+              updateEndTime,
+              updateSelectedYear,
+              updateSelectedSection,
+              updateSelectedSubject,
+              updateSelectedBuilding,
+              updateSelectedFloor,
+              updateSelectedRoom,
+              timeStart,
+              timeEnd,
+              prevSelectedYear,
+              prevSelectedSection,
+              prevSelectedSubject,
+              prevSelectedBuilding,
+              prevSelectedFloor,
+              prevSelectedRoom,
+              selectedDean,
+              selectedDate,
+              resetForms,
+            })
+          }
           >
             <div className="grid grid-cols-1 gap-6 mb-6">
               {/* Dean Assigned */}

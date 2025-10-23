@@ -15,10 +15,11 @@ const OccupiedTimeLogs = ({
   timeSlots,
   subjectsByYear,
   sections,
+  setOccupiedTimes
 }) => {
   const loggedInDean = localStorage.getItem("loggedInDean");
 
-  console.log("uniqueProfessors", uniqueProfessors);
+  console.log("selectedDate in OccupiedTimeLogs:", selectedDate);
 
   const handleDelete = async (entry) => {
     const confirmed = window.confirm(
@@ -52,23 +53,25 @@ const OccupiedTimeLogs = ({
       </h4>
 
       {/* Legend */}
-      <div className="mb-4 flex flex-wrap gap-4 items-center">
-        {uniqueProfessors
-          .filter((prof) => prof && prof.fullName)
-          .map((prof) => {
-            console.log("Legend professor:", prof); // ✅ logs each valid professor object
-
-            const { bg } = getColorClass(prof.fullName);
-            return (
-              <div key={prof._id} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded ${bg}`}></div>
-                <span className="text-sm font-medium text-base-content">
-                  <span>{prof.fullName || "Unknown"}</span>
-                </span>
-              </div>
-            );
-          })}
-      </div>
+    <div className="mb-4 flex flex-wrap gap-4 items-center">
+      {Array.from(
+        new Map(
+          uniqueProfessors
+            .filter((prof) => prof && prof.fullName)
+            .map((prof) => [prof.fullName, prof])
+        ).values()
+      ).map((prof) => {
+        const { bg } = getColorClass(prof.fullName);
+        return (
+          <div key={prof._id} className="flex items-center gap-2">
+            <div className={`w-4 h-4 rounded ${bg}`}></div>
+            <span className="text-sm font-medium text-base-content">
+              {prof.fullName || "Unknown"}
+            </span>
+          </div>
+        );
+      })}
+    </div>
 
       {/* Grouped Slot Display */}
       <div className="mt-4 max-h-96 overflow-y-auto space-y-1">
@@ -134,7 +137,7 @@ const OccupiedTimeLogs = ({
                           timeEnd={slot.timeEnd}
                           timeSlots={timeSlots}
                           occupiedTimes={occupiedTimes}
-                          forceUpdate={forceUpdate}
+                          setOccupiedTimes={setOccupiedTimes}
                           subjectsByYear={subjectsByYear}
                           sections={sections}
                         />

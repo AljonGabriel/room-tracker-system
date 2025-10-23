@@ -9,31 +9,9 @@ import OccupiedTimeLogs from "./OccupiedTimeLogs.jsx";
 import { useState, useEffect, useReducer } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let h = 0; h < 24; h++) {
-    const hour = h.toString().padStart(2, "0");
-    slots.push(`${hour}:00`);
-  }
-  return slots;
-};
-
-// Get all time slots between start and end (inclusive)
-const getTimeRange = (start, end) => {
-  const slots = generateTimeSlots();
-  const startIndex = slots.indexOf(start);
-  const endIndex = slots.indexOf(end);
-
-  if (startIndex === -1 || endIndex === -1 || startIndex > endIndex) return [];
-
-  return slots.slice(startIndex, endIndex + 1); // ✅ this was missing
-};
 
 const AssigningRoom = () => {
-  const location = useLocation();
-  const selectedDate = location.state?.selectedDate
-    ? new Date(location.state.selectedDate)
-    : null;
+
 
   // Fetch state
   const [instructorList, setInstructorList] = useState([]);
@@ -55,8 +33,8 @@ const AssigningRoom = () => {
   const [occupiedTimes, setOccupiedTimes] = useState([]);
 
   //conditional
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
   const [isRepeating, setIsRepeating] = useState("No");
+  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -109,8 +87,6 @@ const AssigningRoom = () => {
             }))
         );
 
-        console.log("expanded", expanded);
-
         setOccupiedTimes(expanded);
       } catch (err) {
         if (axios.isCancel(err)) {
@@ -149,7 +125,35 @@ const AssigningRoom = () => {
     return () => {
       controller.abort(); // ✅ cancel request if room changes quickly
     };
-  }, [ignored, selectedRoom]);
+  }, [selectedRoom]);
+
+
+  const location = useLocation();
+  const selectedDate = location.state?.selectedDate
+    ? new Date(location.state.selectedDate)
+    : null;
+
+
+  const generateTimeSlots = () => {
+  const slots = [];
+  for (let h = 0; h < 24; h++) {
+    const hour = h.toString().padStart(2, "0");
+    slots.push(`${hour}:00`);
+  }
+  return slots;
+};
+
+// Get all time slots between start and end (inclusive)
+const getTimeRange = (start, end) => {
+  const slots = generateTimeSlots();
+  const startIndex = slots.indexOf(start);
+  const endIndex = slots.indexOf(end);
+
+  if (startIndex === -1 || endIndex === -1 || startIndex > endIndex) return [];
+
+  return slots.slice(startIndex, endIndex + 1); // ✅ this was missing
+};
+
 
   const resetForm = () => {
     setSelectedProfessor("");
@@ -210,63 +214,82 @@ const AssigningRoom = () => {
   const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
 
   // Submit assignment to backend
-  const handleAssignRoom = async () => {
-    const dateStr = selectedDate.toLocaleDateString("en-CA"); // → "2025-09-02"
-    const repeating = isRepeating === "Yes"; // dropdown value
+ const handleAssignRoom = async () => {
+  const dateStr = selectedDate.toLocaleDateString("en-CA");
+  const repeating = isRepeating === "Yes";
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // normalize
 
-    const basePayload = {
-      year: selectedYear,
-      subject: selectedSubject,
-      section: selectedSection,
-      building: selectedBuilding,
-      floor: parseInt(selectedFloor, 10),
-      room: selectedRoom,
-      timeStart: startTime,
-      timeEnd: endTime,
-      professor: selectedProfessor,
-      assignedBy: selectedDean,
-      repeating,
-    };
-    console.log("Instructors:", instructorList);
-    try {
-      if (repeating) {
-        const weekday = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ...
-        const month = selectedDate.getMonth();
-        const year = selectedDate.getFullYear();
-        const totalDays = new Date(year, month + 1, 0).getDate();
+  const basePayload = {
+    year: selectedYear,
+    subject: selectedSubject,
+    section: selectedSection,
+    building: selectedBuilding,
+    floor: parseInt(selectedFloor, 10),
+    room: selectedRoom,
+    timeStart: startTime,
+    timeEnd: endTime,
+    professor: selectedProfessor,
+    assignedBy: selectedDean,
+    repeating,
+  };
 
-        const recurringDates = [];
+  try {
+    const newSlots = [];
 
-        for (let day = 1; day <= totalDays; day++) {
-          const current = new Date(year, month, day);
-          if (current.getDay() === weekday) {
-            recurringDates.push(current.toLocaleDateString("en-CA"));
-          }
-        }
+    if (repeating) {
+      const weekday = selectedDate.getDay();
+      const month = selectedDate.getMonth();
+      const year = selectedDate.getFullYear();
+      const totalDays = new Date(year, month + 1, 0).getDate();
 
-        for (const date of recurringDates) {
+      for (let day = 1; day <= totalDays; day++) {
+        const current = new Date(year, month, day);
+        current.setHours(0, 0, 0, 0);
+
+        if (current.getDay() === weekday && current >= today) {
+          const date = current.toLocaleDateString("en-CA");
+
           await axios.post("http://localhost:5001/api/rooms", {
             ...basePayload,
             date,
           });
+
+          newSlots.push({
+            ...basePayload,
+            date,
+            slot: `${startTime}–${endTime}`,
+            _id: "temp-" + date + "-" + Date.now(),
+          });
         }
-
-        toast.success("✅ Repeating schedule assigned!");
-      } else {
-        await axios.post("http://localhost:5001/api/rooms", {
-          ...basePayload,
-          date: dateStr,
-        });
-
-        toast.success("✅ Room successfully assigned!");
       }
 
-      resetForm();
-    } catch (err) {
-      console.error("Error assigning room:", err);
-      alert("❌ Failed to assign room. Please try again.");
+      toast.success("✅ Repeating schedule assigned!");
+    } else {
+      await axios.post("http://localhost:5001/api/rooms", {
+        ...basePayload,
+        date: dateStr,
+      });
+
+      newSlots.push({
+        ...basePayload,
+        date: dateStr,
+        slot: `${startTime}–${endTime}`,
+        _id: "temp-" + Date.now(),
+      });
+
+      toast.success("✅ Room successfully assigned!");
     }
-  };
+
+    // ✅ Update occupiedTimes with new slots
+    setOccupiedTimes((prev) => [...prev, ...newSlots]);
+
+    resetForm();
+  } catch (err) {
+    console.error("Error assigning room:", err);
+    alert("❌ Failed to assign room. Please try again.");
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-6 mt-5">
@@ -651,6 +674,7 @@ const AssigningRoom = () => {
         selectedDean={selectedDean}
         timeSlots={timeSlots}
         occupiedTimes={occupiedTimes}
+        setOccupiedTimes={setOccupiedTimes}
         selectedDate={selectedDate}
         forceUpdate={forceUpdate}
         subjectsByYear={subjectsByYear}
