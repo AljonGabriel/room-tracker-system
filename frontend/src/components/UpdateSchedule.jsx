@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 const UpdateSchedule = ({
@@ -14,7 +14,7 @@ const UpdateSchedule = ({
   buildingData,
   prevSelectedProff,
   selectedDean,
-  id,
+  scheduledID,
   timeEnd,
   timeStart,
   timeSlots,
@@ -65,13 +65,13 @@ const UpdateSchedule = ({
 
   const handleCancelUpdate = () => {
     resetForms();
-    const modal = document.getElementById(`update-modal-${prevSelectedProff}`);
+    const modal = document.getElementById(`update-modal-${scheduledID}`);
     if (modal) modal.checked = false;
   };
 
   const handleScheduleUpdate = async ({
     e,
-    id,
+    scheduledID,
     occupiedTimes,
     onSetOccupiedTimes,
     prevSelectedProff,
@@ -101,11 +101,11 @@ const UpdateSchedule = ({
       return;
     }
 
-    const dateStr = selectedDate.toLocaleDateString('en-CA');
+    const dateStr = new Date(selectedDate).toLocaleDateString('en-CA');
 
     // ✅ Conflict check
     const hasConflictWithOthers = occupiedTimes.some((entry) => {
-      if (entry._id === id) return false;
+      if (entry._id === scheduledID) return false;
 
       return (
         entry.professor !== prevSelectedProff &&
@@ -139,44 +139,44 @@ const UpdateSchedule = ({
 
     try {
       await axios.put(
-        `http://localhost:5001/api/rooms/assignments/${id}`,
+        `http://localhost:5001/api/rooms/assignments/${scheduledID}`,
         payload,
       );
 
       const updatedRecord = {
         ...payload,
-        _id: id,
+        _id: scheduledID,
         slot: `${payload.timeStart}–${payload.timeEnd}`,
-        professor: occupiedTimes.find((entry) => entry._id === id)?.professor,
+        professor: occupiedTimes.find((entry) => entry._id === scheduledID)
+          ?.professor,
       };
 
       // ✅ Update occupiedTimes directly
       onSetOccupiedTimes((prev) =>
-        prev.map((entry) => (entry._id === id ? updatedRecord : entry)),
+        prev.map((entry) =>
+          entry._id === scheduledID ? updatedRecord : entry,
+        ),
       );
 
-      onResetForm();
       resetForms();
 
       toast.success('✅ Schedule updated successfully!');
-      document.getElementById(
-        `update-modal-${prevSelectedProff}`,
-      ).checked = false;
+      document.getElementById(`update-modal-${scheduledID}`).checked = false;
     } catch (error) {
       console.error('Update failed:', error);
       toast.error('❌ Failed to update schedule. Please try again.');
     }
     resetForms();
   };
+  console.log('🛠️ Editing scheduledID:', scheduledID);
+  console.log('🛠️ Editing selectedDate:', selectedDate);
 
   return (
     <>
       <button
         className='btn btn-sm btn-accent'
         onClick={() => {
-          document.getElementById(
-            `update-modal-${prevSelectedProff}`,
-          ).checked = true;
+          document.getElementById(`update-modal-${scheduledID}`).checked = true;
         }}>
         Edit
       </button>
@@ -184,7 +184,7 @@ const UpdateSchedule = ({
       {/* Modal */}
       <input
         type='checkbox'
-        id={`update-modal-${prevSelectedProff}`}
+        id={`update-modal-${scheduledID}`}
         className='modal-toggle'
       />
 
@@ -194,7 +194,7 @@ const UpdateSchedule = ({
             onSubmit={(e) =>
               handleScheduleUpdate({
                 e,
-                id,
+                scheduledID,
                 occupiedTimes,
                 onSetOccupiedTimes,
                 prevSelectedProff,
@@ -221,6 +221,12 @@ const UpdateSchedule = ({
             <div className='grid grid-cols-1 gap-6 mb-6'>
               {/* Dean Assigned */}
               <div className='space-y-2'>
+                <label className='block text-sm font-medium text-base-content'>
+                  {scheduledID}
+                </label>
+                <label className='block text-sm font-medium text-base-content'>
+                  {prevSelectedProff}
+                </label>
                 <label className='block text-sm font-medium text-base-content'>
                   Dean Assigned
                 </label>
@@ -463,8 +469,9 @@ const UpdateSchedule = ({
                   value={updateStartTime}
                   onChange={(e) => {
                     const selectedStart = e.target.value;
-                    const selectedDateStr =
-                      selectedDate.toLocaleDateString('en-CA');
+                    const selectedDateStr = new Date(
+                      selectedDate,
+                    ).toLocaleDateString('en-CA');
 
                     // Filter entries for same room and date
                     const sameDayEntries = occupiedTimes.filter((entry) => {

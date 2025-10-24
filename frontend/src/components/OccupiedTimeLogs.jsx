@@ -123,7 +123,7 @@ const OccupiedTimeLogs = ({
                             slot.professor?.fullName || 'Unknown'
                           }
                           selectedDean={selectedDean}
-                          id={slot._id}
+                          scheduledID={slot._id}
                           timeStart={slot.timeStart}
                           timeEnd={slot.timeEnd}
                           timeSlots={timeSlots}

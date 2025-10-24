@@ -9,26 +9,6 @@ import OccupiedTimeLogs from './OccupiedTimeLogs.jsx';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let h = 0; h < 24; h++) {
-    const hour = h.toString().padStart(2, '0');
-    slots.push(`${hour}:00`);
-  }
-  return slots;
-};
-
-// Get all time slots between start and end (inclusive)
-const getTimeRange = (start, end) => {
-  const slots = generateTimeSlots();
-  const startIndex = slots.indexOf(start);
-  const endIndex = slots.indexOf(end);
-
-  if (startIndex === -1 || endIndex === -1 || startIndex > endIndex) return [];
-
-  return slots.slice(startIndex, endIndex + 1); // ✅ this was missing
-};
-
 const AssigningRoom = () => {
   const location = useLocation();
   const selectedDate = location.state?.selectedDate
@@ -114,6 +94,7 @@ const AssigningRoom = () => {
         );
 
         setOccupiedTimes(expanded);
+        console.log('Fetched occupied times for room:', selectedRoom, expanded);
       } catch (err) {
         if (axios.isCancel(err)) {
           console.log('⏹️ Request canceled due to component update');
@@ -149,6 +130,27 @@ const AssigningRoom = () => {
       controller.abort(); // ✅ cancel request if room changes quickly
     };
   }, [selectedRoom]);
+
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let h = 0; h < 24; h++) {
+      const hour = h.toString().padStart(2, '0');
+      slots.push(`${hour}:00`);
+    }
+    return slots;
+  };
+
+  // Get all time slots between start and end (inclusive)
+  const getTimeRange = (start, end) => {
+    const slots = generateTimeSlots();
+    const startIndex = slots.indexOf(start);
+    const endIndex = slots.indexOf(end);
+
+    if (startIndex === -1 || endIndex === -1 || startIndex > endIndex)
+      return [];
+
+    return slots.slice(startIndex, endIndex + 1); // ✅ this was missing
+  };
 
   const resetForm = () => {
     setSelectedProfessor('');
