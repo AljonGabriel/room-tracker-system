@@ -1,27 +1,32 @@
 import express from "express";
 import {
-  deleteOccupiedRoomTime,
-  getOccupiedRooms,
-  assignRoom,
-  updateOccupiedRoomTime,
+  deleteAssignmentsByProfessor,
+  getAssignmentsByDate,
+  createAssignment,
+  updateAssignment,
   getFilteredSchedule,
-  deleteOccupiedTimeByID,
+  deleteAssignmentById,
+  getAllAssignments,
 } from "../controllers/rooomControllers.js";
 
 const router = express.Router();
 
-router.get("/", getOccupiedRooms);
+// 📅 Get assignments filtered by date
+router.get("/assignments/by-date", getAssignmentsByDate); // Use query param: ?date=2025-10-24
 
-router.get("/report", getFilteredSchedule);
+// 🧾 Get all assignments (no filters)
+router.get("/assignments/", getAllAssignments); // Optional: merge with above if logic allows
 
-router.post("/", assignRoom);
+// 📊 Get filtered report (e.g., by building, professor)
+router.get("/assignments/filtered", getFilteredSchedule);
 
-router.put("/:id", updateOccupiedRoomTime);
+// 🏫 Create a new assignment
+router.post("/assignments/", createAssignment);
 
-// Delete all schedules for a specific professor
-router.delete("/occupiedTime", deleteOccupiedRoomTime);
+// ✏️ Update an assignment by ID
+router.put("/assignments/:id", updateAssignment);
 
-// Delete schedules by time range
-router.delete("/occupiedTime/:id", deleteOccupiedTimeByID); // Accepts timeStart/timeEnd in body or query
+// ❌ Delete a specific assignment by ID
+router.delete("/assignments/:id", deleteAssignmentById);
 
 export default router;

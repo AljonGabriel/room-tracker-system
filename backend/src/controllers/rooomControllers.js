@@ -1,8 +1,42 @@
 import Room from "../models/Room.js";
 import mongoose from "mongoose";
 
+//Get All Occupied Rooms
+// Get All Occupied Rooms (no filters)
+export const getAllAssignments = async (req, res) => {
+  try {
+    // ✅ Fetch all room assignments
+    const allAssignments = await Room.find().populate(
+      "professor",
+      "fullName role"
+    );
+
+    const occupiedRooms = allAssignments.map((entry) => ({
+      _id: entry._id,
+      timeStart: entry.timeStart,
+      timeEnd: entry.timeEnd,
+      professor: entry.professor,
+      room: entry.room,
+      year: entry.year,
+      subject: entry.subject,
+      section: entry.section,
+      building: entry.building,
+      floor: entry.floor,
+      date: entry.date,
+      assignedBy: entry.assignedBy,
+    }));
+
+    console.log("✅ All occupied rooms:", occupiedRooms.length);
+
+    return res.status(200).json(occupiedRooms);
+  } catch (error) {
+    console.error("❌ Error in getAllOccupiedRooms:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // GET /api/rooms?room=R201&date=2025-09-01
-export const getOccupiedRooms = async (req, res) => {
+export const getAssignmentsByDate = async (req, res) => {
   try {
     const { room, date } = req.query;
 
@@ -99,7 +133,7 @@ export const getFilteredSchedule = async (req, res) => {
   }
 };
 
-export const assignRoom = async (req, res) => {
+export const createAssignment = async (req, res) => {
   try {
     const {
       date,
@@ -156,7 +190,7 @@ export const assignRoom = async (req, res) => {
   }
 };
 
-export const updateOccupiedRoomTime = async (req, res) => {
+export const updateAssignment = async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
 
@@ -176,7 +210,7 @@ export const updateOccupiedRoomTime = async (req, res) => {
   }
 };
 
-export const deleteOccupiedRoomTime = async (req, res) => {
+export const deleteAssignmentsByProfessor = async (req, res) => {
   const { professor } = req.query;
 
   if (!professor) {
@@ -194,7 +228,7 @@ export const deleteOccupiedRoomTime = async (req, res) => {
   }
 };
 
-export const deleteOccupiedTimeByID = async (req, res) => {
+export const deleteAssignmentById = async (req, res) => {
   const { id } = req.params;
 
   try {

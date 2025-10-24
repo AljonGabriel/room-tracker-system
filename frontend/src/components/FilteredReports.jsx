@@ -21,12 +21,15 @@ const FilteredReports = () => {
     const fetchSchedule = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:5001/api/rooms/report", {
-          params: {
-            filterType: selectedFilter.toLowerCase(),
-            value: selectedValue,
-          },
-        });
+        const res = await axios.get(
+          "http://localhost:5001/api/rooms/assignments/filtered",
+          {
+            params: {
+              filterType: selectedFilter.toLowerCase(),
+              value: selectedValue,
+            },
+          }
+        );
         setSchedule(res.data);
         console.log("✅ Schedule loaded:", res.data);
       } catch (error) {
