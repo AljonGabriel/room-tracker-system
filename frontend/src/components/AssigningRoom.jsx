@@ -1,18 +1,18 @@
-import buildingData from "../data/buildingData";
-import colorPalette from "../data/colorPalette.js";
-import sections from "../data/sections.js";
-import subjectsByYear from "../data/subjectsByYear.js";
+import buildingData from '../data/buildingData';
+import colorPalette from '../data/colorPalette.js';
+import sections from '../data/sections.js';
+import subjectsByYear from '../data/subjectsByYear.js';
 
-import axios from "axios";
-import toast from "react-hot-toast";
-import OccupiedTimeLogs from "./OccupiedTimeLogs.jsx";
-import { useState, useEffect, useReducer } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import OccupiedTimeLogs from './OccupiedTimeLogs.jsx';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const generateTimeSlots = () => {
   const slots = [];
   for (let h = 0; h < 24; h++) {
-    const hour = h.toString().padStart(2, "0");
+    const hour = h.toString().padStart(2, '0');
     slots.push(`${hour}:00`);
   }
   return slots;
@@ -41,24 +41,21 @@ const AssigningRoom = () => {
   // Form state
 
   const [selectedDean, setSelectedDean] = useState(() => {
-    return localStorage.getItem("loggedInDean") || "";
+    return localStorage.getItem('loggedInDean') || '';
   });
-  const [selectedProfessor, setSelectedProfessor] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedSection, setSelectedSection] = useState("");
-  const [selectedBuilding, setSelectedBuilding] = useState("");
-  const [selectedFloor, setSelectedFloor] = useState("");
-  const [selectedRoom, setSelectedRoom] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [selectedProfessor, setSelectedProfessor] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [selectedFloor, setSelectedFloor] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [occupiedTimes, setOccupiedTimes] = useState([]);
 
   //conditional
-  const [ignored, forceUpdate] = useReducer((x) => x + 1, 0);
-  const [isRepeating, setIsRepeating] = useState("No");
-
-  console.log("occupiedTimes assigning room:", occupiedTimes);
+  const [isRepeating, setIsRepeating] = useState('No');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -66,24 +63,24 @@ const AssigningRoom = () => {
     const fetchOccupiedTimes = async () => {
       try {
         if (!selectedDate) {
-          console.warn("⚠️ Missing selectedDate or selectedRoom");
-          navigate("/");
+          console.warn('⚠️ Missing selectedDate or selectedRoom');
+          navigate('/');
           return;
         }
 
-        const dateStr = selectedDate.toLocaleDateString("en-CA"); // → "2025-09-01"
+        const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-01"
 
         const res = await axios.get(
-          "http://localhost:5001/api/rooms/assignments/by-date",
+          'http://localhost:5001/api/rooms/assignments/by-date',
           {
             params: {
               room: selectedRoom,
               date: dateStr,
             },
             signal: controller.signal,
-          }
+          },
         );
-        console.log("Raw data:", res.data);
+
         const expanded = res.data.flatMap(
           ({
             timeStart,
@@ -113,22 +110,15 @@ const AssigningRoom = () => {
               subject,
               section,
               assignedBy,
-            }))
+            })),
         );
-
-        console.log("expanded", expanded);
 
         setOccupiedTimes(expanded);
       } catch (err) {
         if (axios.isCancel(err)) {
-          console.log("⏹️ Request canceled due to component update");
+          console.log('⏹️ Request canceled due to component update');
         } else {
-          console.error("❌ Failed to fetch occupied times", err);
-          if (!Array.isArray(res.data)) {
-            console.warn("⚠️ Unexpected response format:", res.data);
-            setOccupiedTimes([]);
-            return;
-          }
+          console.error('❌ Failed to fetch occupied times', err);
         }
       }
     };
@@ -136,19 +126,17 @@ const AssigningRoom = () => {
     const fetchEmployees = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5001/api/employees/getemp"
+          'http://localhost:5001/api/employees/getemp',
         );
         const allEmployees = res.data;
 
         const instructors = allEmployees
-          .filter((emp) => emp.role === "Instructor")
+          .filter((emp) => emp.role === 'Instructor')
           .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
 
         setInstructorList(instructors); // ✅ Add this state if needed
-
-        console.log("Instructors:", instructors);
       } catch (error) {
-        console.error("❌ Failed to fetch employees", error);
+        console.error('❌ Failed to fetch employees', error);
 
         setInstructorList([]);
       }
@@ -160,18 +148,18 @@ const AssigningRoom = () => {
     return () => {
       controller.abort(); // ✅ cancel request if room changes quickly
     };
-  }, [ignored, selectedRoom]);
+  }, [selectedRoom]);
 
   const resetForm = () => {
-    setSelectedProfessor("");
-    setSelectedYear("");
-    setSelectedSubject("");
-    setSelectedSection("");
-    setSelectedBuilding("");
-    setSelectedFloor("");
-    setSelectedRoom("");
-    setStartTime("");
-    setEndTime("");
+    setSelectedProfessor('');
+    setSelectedYear('');
+    setSelectedSubject('');
+    setSelectedSection('');
+    setSelectedBuilding('');
+    setSelectedFloor('');
+    setSelectedRoom('');
+    setStartTime('');
+    setEndTime('');
     setOccupiedTimes([]);
   };
 
@@ -214,7 +202,7 @@ const AssigningRoom = () => {
   }, {});
 
   const uniqueProfessors = Array.from(
-    new Set(occupiedTimes.map((entry) => entry.professor))
+    new Set(occupiedTimes.map((entry) => entry.professor)),
   );
 
   // Year and subject toggle
@@ -222,8 +210,8 @@ const AssigningRoom = () => {
 
   // Submit assignment to backend
   const handleAssignRoom = async () => {
-    const dateStr = selectedDate.toLocaleDateString("en-CA"); // → "2025-09-02"
-    const repeating = isRepeating === "Yes"; // dropdown value
+    const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-02"
+    const repeating = isRepeating === 'Yes'; // dropdown value
 
     const basePayload = {
       year: selectedYear,
@@ -238,7 +226,7 @@ const AssigningRoom = () => {
       assignedBy: selectedDean,
       repeating,
     };
-    console.log("Instructors:", instructorList);
+    console.log('Instructors:', instructorList);
     try {
       if (repeating) {
         const weekday = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ...
@@ -251,100 +239,100 @@ const AssigningRoom = () => {
         for (let day = 1; day <= totalDays; day++) {
           const current = new Date(year, month, day);
           if (current.getDay() === weekday) {
-            recurringDates.push(current.toLocaleDateString("en-CA"));
+            recurringDates.push(current.toLocaleDateString('en-CA'));
           }
         }
 
         for (const date of recurringDates) {
-          await axios.post("http://localhost:5001/api/rooms/assignments/", {
+          await axios.post('http://localhost:5001/api/rooms/assignments/', {
             ...basePayload,
             date,
           });
         }
 
-        toast.success("✅ Repeating schedule assigned!");
+        toast.success('✅ Repeating schedule assigned!');
       } else {
-        await axios.post("http://localhost:5001/api/rooms/assignments/", {
+        await axios.post('http://localhost:5001/api/rooms/assignments/', {
           ...basePayload,
           date: dateStr,
         });
 
-        toast.success("✅ Room successfully assigned!");
+        toast.success('✅ Room successfully assigned!');
       }
 
       resetForm();
     } catch (err) {
-      console.error("Error assigning room:", err);
-      alert("❌ Failed to assign room. Please try again.");
+      console.error('Error assigning room:', err);
+      alert('❌ Failed to assign room. Please try again.');
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-6 mt-5">
-      <h2 className="text-xl font-bold text-center">📝 Assign a Room</h2>
+    <div className='max-w-5xl mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-6 mt-5'>
+      <h2 className='text-xl font-bold text-center'>📝 Assign a Room</h2>
 
       {/* Selected Date Display */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Selected Date:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Selected Date:</label>
         {selectedDate && (
           <input
-            type="text"
-            className="input input-bordered flex-1 bg-base-300 text-center font-semibold"
+            type='text'
+            className='input input-bordered flex-1 bg-base-300 text-center font-semibold'
             value={selectedDate.toDateString()}
             readOnly
           />
         )}
         <button
-          className="btn btn-outline btn-info whitespace-nowrap"
+          className='btn btn-outline btn-info whitespace-nowrap'
           onClick={() => {
-            localStorage.removeItem("selectedDate");
-            toast.success("Please choose a new date.");
+            localStorage.removeItem('selectedDate');
+            toast.success('Please choose a new date.');
 
             // Delay navigation slightly to allow toast to render
             setTimeout(() => {
-              navigate("/home");
+              navigate('/home');
             }, 200); // 500ms is usually enough
-          }}
-        >
+          }}>
           Change Date
         </button>
         {/* Action Button */}
-        <div className="flex">
+        <div className='flex'>
           <button
-            className="btn btn-outline btn-accent"
+            className='btn btn-outline btn-accent'
             onClick={() => {
-              navigate("/employees");
-            }}
-          >
+              navigate('/employees');
+            }}>
             Manage Employee
           </button>
         </div>
       </div>
 
       {/* Dean Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Assigned by:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Assigned by:</label>
         <select
-          className="select select-bordered flex-1 bg-base-200 cursor-not-allowed"
+          className='select select-bordered flex-1 bg-base-200 cursor-not-allowed'
           value={selectedDean}
-          disabled
-        >
+          disabled>
           <option value={selectedDean}>{selectedDean}</option>
         </select>
       </div>
 
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Instructor:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Instructor:</label>
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedProfessor}
-          onChange={(e) => setSelectedProfessor(e.target.value)}
-        >
-          <option disabled value="">
+          onChange={(e) => setSelectedProfessor(e.target.value)}>
+          <option
+            disabled
+            value=''>
             Will teach by?
           </option>
           {instructorList.map((prof) => (
-            <option key={prof.id} value={prof.id}>
+            <option
+              key={prof.id}
+              value={prof.id}>
               {prof.fullName}
             </option>
           ))}
@@ -352,22 +340,25 @@ const AssigningRoom = () => {
       </div>
 
       {/* Year Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Year Level:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Year Level:</label>
 
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedYear}
           onChange={(e) => {
             setSelectedYear(e.target.value);
-            setSelectedSubject(""); // reset subject
-          }}
-        >
-          <option disabled value="">
+            setSelectedSubject(''); // reset subject
+          }}>
+          <option
+            disabled
+            value=''>
             What year level? 🎓
           </option>
           {Object.keys(subjectsByYear).map((year) => (
-            <option key={year} value={year}>
+            <option
+              key={year}
+              value={year}>
               {year}
             </option>
           ))}
@@ -375,19 +366,22 @@ const AssigningRoom = () => {
       </div>
 
       {/* Subject Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Subject:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Subject:</label>
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedSubject}
           onChange={(e) => setSelectedSubject(e.target.value)}
-          disabled={!selectedYear}
-        >
-          <option disabled value="">
+          disabled={!selectedYear}>
+          <option
+            disabled
+            value=''>
             What lesson? 📘
           </option>
           {subjectOptions.map((subj) => (
-            <option key={subj} value={subj}>
+            <option
+              key={subj}
+              value={subj}>
               {subj}
             </option>
           ))}
@@ -395,18 +389,21 @@ const AssigningRoom = () => {
       </div>
 
       {/* Sections Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Section:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Section:</label>
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedSection}
-          onChange={(e) => setSelectedSection(e.target.value)}
-        >
-          <option disabled value="">
+          onChange={(e) => setSelectedSection(e.target.value)}>
+          <option
+            disabled
+            value=''>
             What section?
           </option>
           {sections.map((sec) => (
-            <option key={sec} value={sec}>
+            <option
+              key={sec}
+              value={sec}>
               {sec}
             </option>
           ))}
@@ -414,24 +411,27 @@ const AssigningRoom = () => {
       </div>
 
       {/* Building Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Building:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Building:</label>
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedBuilding}
           onChange={(e) => {
             setSelectedBuilding(e.target.value);
-            setSelectedFloor("");
-            setSelectedRoom("");
-            setStartTime("");
-            setEndTime("");
-          }}
-        >
-          <option disabled value="">
+            setSelectedFloor('');
+            setSelectedRoom('');
+            setStartTime('');
+            setEndTime('');
+          }}>
+          <option
+            disabled
+            value=''>
             Location ?
           </option>
           {buildings.map((b) => (
-            <option key={b} value={b}>
+            <option
+              key={b}
+              value={b}>
               {b}
             </option>
           ))}
@@ -439,25 +439,28 @@ const AssigningRoom = () => {
       </div>
 
       {/* Floor Dropdown */}
-      <div className="flex items-center gap-4">
-        <label className="font-medium w-32">Floor Level:</label>
+      <div className='flex items-center gap-4'>
+        <label className='font-medium w-32'>Floor Level:</label>
         <select
-          className="select select-bordered flex-1"
+          className='select select-bordered flex-1'
           value={selectedFloor}
           onChange={(e) => {
             setSelectedFloor(e.target.value); // still stores as string
-            setSelectedRoom("");
-            setStartTime("");
-            setEndTime("");
-          }}
-        >
-          <option disabled value="">
+            setSelectedRoom('');
+            setStartTime('');
+            setEndTime('');
+          }}>
+          <option
+            disabled
+            value=''>
             Select Level
           </option>
           {floors.map((f) => {
-            const floorNum = parseInt(f.replace(/\D/g, ""));
+            const floorNum = parseInt(f.replace(/\D/g, ''));
             return (
-              <option key={f} value={floorNum}>
+              <option
+                key={f}
+                value={floorNum}>
                 {floorNum}
               </option>
             );
@@ -465,37 +468,35 @@ const AssigningRoom = () => {
         </select>
       </div>
 
-      <div className="flex items-center gap-4">
-        <label className="text-sm font-medium min-w-[200px]">
+      <div className='flex items-center gap-4'>
+        <label className='text-sm font-medium min-w-[200px]'>
           Repeat this schedule weekly?
         </label>
 
         <select
-          className="select select-bordered w-full max-w-xs"
+          className='select select-bordered w-full max-w-xs'
           value={isRepeating}
-          onChange={(e) => setIsRepeating(e.target.value)}
-        >
-          <option value="No">No</option>
-          <option value="Yes">Yes</option>
+          onChange={(e) => setIsRepeating(e.target.value)}>
+          <option value='No'>No</option>
+          <option value='Yes'>Yes</option>
         </select>
       </div>
 
       {/* Room Grid */}
       {rooms.length > 0 && (
         <div>
-          <h3 className="text-md font-semibold mb-2 text-center">
+          <h3 className='text-md font-semibold mb-2 text-center'>
             Select a Room
           </h3>
-          <div className="grid grid-cols-5 gap-3">
+          <div className='grid grid-cols-5 gap-3'>
             {rooms.map((room) => (
               <button
                 key={room}
-                type="button"
+                type='button'
                 className={`btn btn-sm w-full ${
-                  selectedRoom === room ? "btn-primary" : "btn-outline"
+                  selectedRoom === room ? 'btn-primary' : 'btn-outline'
                 }`}
-                onClick={() => setSelectedRoom(room)}
-              >
+                onClick={() => setSelectedRoom(room)}>
                 {room}
               </button>
             ))}
@@ -507,20 +508,20 @@ const AssigningRoom = () => {
       {selectedRoom && (
         <>
           {/* Start Time Dropdown */}
-          <div className="flex items-center gap-4">
-            <label className="font-medium w-32">Class Starts at:</label>
+          <div className='flex items-center gap-4'>
+            <label className='font-medium w-32'>Class Starts at:</label>
             <select
-              className="select select-bordered flex-1"
+              className='select select-bordered flex-1'
               value={startTime}
               onChange={(e) => {
                 const selectedStart = e.target.value;
                 const selectedDateStr =
-                  selectedDate.toLocaleDateString("en-CA");
+                  selectedDate.toLocaleDateString('en-CA');
 
                 // Filter entries for same room and date
                 const sameDayEntries = occupiedTimes.filter((entry) => {
                   const entryDateStr = new Date(entry.date).toLocaleDateString(
-                    "en-CA"
+                    'en-CA',
                   );
                   return entryDateStr === selectedDateStr;
                 });
@@ -530,12 +531,12 @@ const AssigningRoom = () => {
                   (entry) =>
                     selectedStart >= entry.timeStart &&
                     selectedStart < entry.timeEnd &&
-                    selectedStart !== entry.timeEnd
+                    selectedStart !== entry.timeEnd,
                 );
 
                 if (isInsideOccupiedRange) {
                   toast.error(
-                    `${selectedStart} overlaps with an existing booking in Room ${selectedRoom}.`
+                    `${selectedStart} overlaps with an existing booking in Room ${selectedRoom}.`,
                   );
                   return;
                 }
@@ -544,7 +545,7 @@ const AssigningRoom = () => {
                 const matchingEntry = sameDayEntries.find(
                   (entry) =>
                     entry.timeStart === selectedStart &&
-                    entry.timeEnd === endTime
+                    entry.timeEnd === endTime,
                 );
                 const selectedBookingId = matchingEntry?._id;
 
@@ -552,46 +553,47 @@ const AssigningRoom = () => {
                 const isStartTimeAlreadyTaken = sameDayEntries.some(
                   (entry) =>
                     entry.timeStart === selectedStart &&
-                    entry._id !== selectedBookingId
+                    entry._id !== selectedBookingId,
                 );
 
                 if (isStartTimeAlreadyTaken) {
                   toast.error(
-                    `${selectedStart} is already used by another booking in Room ${selectedRoom}.`
+                    `${selectedStart} is already used by another booking in Room ${selectedRoom}.`,
                   );
-                  setStartTime("");
+                  setStartTime('');
                   return;
                 }
 
                 // All good — set the selected start time
                 setStartTime(selectedStart);
-              }}
-            >
-              <option disabled value="">
+              }}>
+              <option
+                disabled
+                value=''>
                 Start:
               </option>
               {timeSlots.map((slot) => {
                 const conflict = occupiedTimes.find(
-                  (entry) => entry.slot === slot
+                  (entry) => entry.slot === slot,
                 );
                 const nextConflict = occupiedTimes.find(
                   (entry) =>
                     entry.timeStart === conflict?.timeEnd &&
-                    entry.room === selectedRoom
+                    entry.room === selectedRoom,
                 );
                 const isOccupied = !!conflict;
 
                 let label = `${slot}`;
                 if (isOccupied) {
-                  label += ` ${conflict.professor?.fullName || "Unknown"} • ${
+                  label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room
                   } • ${conflict.building}`;
                   if (nextConflict) {
                     label += ` → Next: ${
-                      nextConflict.professor?.fullName || "Unknown"
+                      nextConflict.professor?.fullName || 'Unknown'
                     } (${nextConflict.timeStart}–${nextConflict.timeEnd})`;
                   }
-                  label += ".";
+                  label += '.';
                 }
 
                 return (
@@ -600,10 +602,9 @@ const AssigningRoom = () => {
                     value={slot}
                     className={`text-sm ${
                       isOccupied
-                        ? "bg-neutral text-neutral-content font-semibold"
-                        : "text-base-content"
-                    }`}
-                  >
+                        ? 'bg-neutral text-neutral-content font-semibold'
+                        : 'text-base-content'
+                    }`}>
                     {label}
                   </option>
                 );
@@ -612,25 +613,26 @@ const AssigningRoom = () => {
           </div>
 
           {/* End Time Dropdown */}
-          <div className="flex items-center gap-4">
-            <label className="font-medium w-32">End Time:</label>
+          <div className='flex items-center gap-4'>
+            <label className='font-medium w-32'>End Time:</label>
             <select
-              className="select select-bordered flex-1"
+              className='select select-bordered flex-1'
               value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-            >
-              <option disabled value="">
+              onChange={(e) => setEndTime(e.target.value)}>
+              <option
+                disabled
+                value=''>
                 Select End
               </option>
               {timeSlots.map((slot) => {
                 const conflict = occupiedTimes.find(
-                  (entry) => entry.slot === slot
+                  (entry) => entry.slot === slot,
                 );
                 const isOccupied = !!conflict;
 
                 let label = slot;
                 if (isOccupied && conflict) {
-                  label += ` ${conflict.professor?.fullName || "Unknown"} • ${
+                  label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room
                   } • ${conflict.building}`;
                 }
@@ -644,12 +646,11 @@ const AssigningRoom = () => {
                     disabled={isOccupied || isSameAsStart}
                     className={
                       isOccupied
-                        ? "bg-neutral text-neutral-content text-sm"
+                        ? 'bg-neutral text-neutral-content text-sm'
                         : isSameAsStart
-                        ? "bg-green-500 text-white font-semibold"
-                        : "text-sm text-base-content"
-                    }
-                  >
+                        ? 'bg-green-500 text-white font-semibold'
+                        : 'text-sm text-base-content'
+                    }>
                     {label}
                   </option>
                 );
@@ -667,9 +668,9 @@ const AssigningRoom = () => {
         occupiedTimes={occupiedTimes}
         onSetOccupiedTimes={setOccupiedTimes}
         selectedDate={selectedDate}
-        forceUpdate={forceUpdate}
         subjectsByYear={subjectsByYear}
         sections={sections}
+        onResetForm={resetForm}
       />
 
       {/* Summary Display */}
@@ -679,17 +680,17 @@ const AssigningRoom = () => {
         startTime &&
         endTime &&
         selectedDate && (
-          <div className="text-center text-success mt-4">
-            ✅ Assigned by <strong>{selectedDean}</strong> to{" "}
+          <div className='text-center text-success mt-4'>
+            ✅ Assigned by <strong>{selectedDean}</strong> to{' '}
             <strong>{selectedProfessor}</strong>
             <br />
-            Room <strong>{selectedRoom}</strong> in{" "}
-            <strong>{selectedBuilding}</strong>,{" "}
+            Room <strong>{selectedRoom}</strong> in{' '}
+            <strong>{selectedBuilding}</strong>,{' '}
             <strong>{selectedFloor}</strong>
             <br />
             Date: <strong>{selectedDate.toDateString()}</strong>
             <br />
-            Time Range: <strong>{startTime}</strong> to{" "}
+            Time Range: <strong>{startTime}</strong> to{' '}
             <strong>{endTime}</strong>
           </div>
         )}
@@ -701,8 +702,10 @@ const AssigningRoom = () => {
         startTime &&
         endTime &&
         selectedDate && (
-          <div className="text-center mt-4">
-            <button className="btn btn-success" onClick={handleAssignRoom}>
+          <div className='text-center mt-4'>
+            <button
+              className='btn btn-success'
+              onClick={handleAssignRoom}>
               Confirm schedule
             </button>
           </div>
