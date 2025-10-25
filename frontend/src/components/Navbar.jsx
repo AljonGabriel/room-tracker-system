@@ -10,40 +10,41 @@ const Navbar = () => {
   };
 
   return (
-    <header className='navbar bg-base-100 shadow-md px-4'>
-      {/* Left: Logo + Navigation */}
-      <div className='flex items-center gap-6 flex-1'>
+    <header className='navbar bg-base-100 shadow-md px-4 flex-wrap'>
+      {/* Left: Logo + Title */}
+      <div className='flex items-center gap-2 flex-1'>
         <a
           href='/home'
-          className='flex items-center gap-2 btn btn-ghost text-xl font-bold tracking-wide'>
+          className='flex items-center gap-2 btn btn-ghost text-lg font-bold tracking-wide'>
           <img
             src={logo}
             alt='Dean Room Tracker Logo'
             className='w-8 h-8 object-contain'
           />
-          CCA Dean Room Tracker
+          <span className='whitespace-nowrap'>CCA Dean Room Tracker</span>
         </a>
-
-        <nav className='hidden lg:flex'>
-          <ul className='menu menu-horizontal px-1 text-sm font-medium'>
-            <li>
-              <a href='/home'>Home</a>
-            </li>
-            <li>
-              <a href='/reports'>Reports</a>
-            </li>
-            <li>
-              <a href='/employees'>Employees</a>
-            </li>
-            <li>
-              <a href='/occupied'>Occupied Rooms</a>
-            </li>
-          </ul>
-        </nav>
       </div>
 
-      {/* Right: Dean Name + Logout */}
-      <div className='flex items-center gap-4 flex-none'>
+      {/* Desktop Nav */}
+      <nav className='hidden lg:flex flex-1 justify-center'>
+        <ul className='menu menu-horizontal px-1 text-sm font-medium'>
+          <li>
+            <a href='/home'>Home</a>
+          </li>
+          <li>
+            <a href='/reports'>Reports</a>
+          </li>
+          <li>
+            <a href='/employees'>Employees</a>
+          </li>
+          <li>
+            <a href='/occupied'>Occupied Rooms</a>
+          </li>
+        </ul>
+      </nav>
+
+      {/* Right: Dean Info + Logout (Desktop Only) */}
+      <div className='hidden lg:flex items-center gap-4 flex-none'>
         {loggedInDean && (
           <span className='text-sm text-base-content font-medium'>
             Logged in as{' '}
@@ -88,6 +89,15 @@ const Navbar = () => {
           <li>
             <a href='/employees'>Employees</a>
           </li>
+          <li>
+            <a href='/occupied'>Occupied Rooms</a>
+          </li>
+          {loggedInDean && (
+            <li className='text-sm px-2 text-base-content'>
+              Logged in as{' '}
+              <strong className='text-success'>{loggedInDean}</strong>
+            </li>
+          )}
           <li>
             <button
               onClick={handleLogout}
