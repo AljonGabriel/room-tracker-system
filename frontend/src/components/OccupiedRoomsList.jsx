@@ -8,14 +8,14 @@ import subjectsByYear from '../data/subjectsByYear.js';
 import sections from '../data/sections.js';
 
 const OccupiedRoomsList = () => {
+  const API_BASE = import.meta.env.VITE_API_BASE;
+
   const [occupiedRooms, setOccupiedRooms] = useState([]);
 
   useEffect(() => {
     const getOccupiedRooms = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5001/api/rooms/assignments',
-        );
+        const res = await axios.get(`${API_BASE}/api/rooms/assignments`);
 
         const expanded = res.data.flatMap(
           ({

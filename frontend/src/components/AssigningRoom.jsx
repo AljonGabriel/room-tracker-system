@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const AssigningRoom = () => {
+  const API_BASE = import.meta.env.VITE_API_BASE;
   const location = useLocation();
   const selectedDate = location.state?.selectedDate
     ? new Date(location.state.selectedDate)
@@ -51,7 +52,7 @@ const AssigningRoom = () => {
         const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-01"
 
         const res = await axios.get(
-          'http://localhost:5001/api/rooms/assignments/by-date',
+          `${API_BASE}/api/rooms/assignments/by-date`,
           {
             params: {
               room: selectedRoom,
@@ -106,9 +107,7 @@ const AssigningRoom = () => {
 
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5001/api/employees/getemp',
-        );
+        const res = await axios.get(`${API_BASE}/api/employees/getemp`);
         const allEmployees = res.data;
 
         const instructors = allEmployees

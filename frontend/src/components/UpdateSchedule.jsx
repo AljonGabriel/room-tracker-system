@@ -24,6 +24,8 @@ const UpdateSchedule = ({
   subjectsByYear,
   sections,
 }) => {
+  const API_BASE = import.meta.env.VITE_API_BASE;
+
   const [updateSelectedYear, setUpdateSelectedYear] = useState('');
   const [updateSelectedSubject, setUpdateSelectedSubject] = useState('');
   const [updateSelectedSection, setUpdateSelectedSection] = useState('');
@@ -139,7 +141,7 @@ const UpdateSchedule = ({
 
     try {
       await axios.put(
-        `http://localhost:5001/api/rooms/assignments/${scheduledID}`,
+        `${API_BASE}/api/rooms/assignments/${scheduledID}`,
         payload,
       );
 
