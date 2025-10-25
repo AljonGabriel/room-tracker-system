@@ -47,9 +47,7 @@ const FilteredReports = () => {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5001/api/employees/getemp',
-        );
+        const res = await axios.get(`${API_BASE}/api/employees/getemp`);
         const employees = res.data;
 
         const instructors = employees
