@@ -1,6 +1,9 @@
 import buildingData from '../data/buildingData';
 import UpdateSchedule from './UpdateSchedule';
 import DelSchedule from './DelSchedule';
+import ModalWrapper from './modals/ModalWrapper';
+import { useState } from 'react';
+import OccupiedRoomsList from './OccupiedRoomsList';
 
 const OccupiedTimeLogs = ({
   groupedByProfessor,
@@ -16,14 +19,26 @@ const OccupiedTimeLogs = ({
   onResetForm,
 }) => {
   const loggedInDean = localStorage.getItem('loggedInDean');
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div>
       <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 my-4'>
         <h4 className='font-semibold text-lg text-base-content'>
-          📌 Occupied Time Slots
+          📌 Scheduled Rooms logs
         </h4>
 
-        <button className='btn btn-outline'>View assigned rooms</button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className='btn btn-secondary btn-outline'>
+          View All
+        </button>
+        <ModalWrapper
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}>
+          <OccupiedRoomsList />
+        </ModalWrapper>
       </div>
 
       {/* Legend */}

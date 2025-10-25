@@ -285,7 +285,7 @@ const AssigningRoom = () => {
           />
         )}
         <button
-          className='btn btn-outline btn-info whitespace-nowrap'
+          className='btn btn-warning btn-outline btn-info whitespace-nowrap'
           onClick={() => {
             localStorage.removeItem('selectedDate');
             toast.success('Please choose a new date.');
