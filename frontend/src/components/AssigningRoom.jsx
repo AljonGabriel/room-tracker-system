@@ -328,7 +328,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Will teach by?
+            ...
           </option>
           {instructorList.map((prof) => (
             <option
