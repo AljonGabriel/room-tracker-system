@@ -102,7 +102,16 @@ export const getFilteredSchedule = async (req, res) => {
     let query = {};
 
     if (actualField === 'date') {
-      // Date logic stays the same
+      const selectedDate = new Date(value);
+      selectedDate.setHours(0, 0, 0, 0); // normalize to start of day
+
+      const nextDate = new Date(selectedDate);
+      nextDate.setDate(selectedDate.getDate() + 1); // next day start
+
+      query[actualField] = {
+        $gte: selectedDate,
+        $lt: nextDate,
+      };
     } else if (actualField === 'professor') {
       // ✅ Validate before casting
       if (mongoose.Types.ObjectId.isValid(value)) {

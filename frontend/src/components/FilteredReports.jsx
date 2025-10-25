@@ -61,9 +61,6 @@ const FilteredReports = () => {
           .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
 
         setDeansList(deans); // ✅ Add this state if needed
-
-        console.log('Instructors:', instructors);
-        console.log('Deans:', deans);
       } catch (error) {
         console.error('❌ Failed to fetch employees', error);
 
@@ -73,6 +70,9 @@ const FilteredReports = () => {
 
     fetchEmployees();
   }, []);
+
+  console.log('selectedFilter:', selectedFilter);
+  console.log('selectedValue:', selectedValue);
 
   console.log('instructorsList:', instructorsList);
   console.log('Type of instructorsList:', typeof instructorsList);
