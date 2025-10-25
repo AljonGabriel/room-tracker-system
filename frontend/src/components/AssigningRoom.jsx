@@ -310,7 +310,7 @@ const AssigningRoom = () => {
 
       {/* Dean Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Assigned by:</label>
+        <label className='font-medium w-32'>Dean Assigned:</label>
         <select
           className='select select-bordered flex-1 bg-base-200 cursor-not-allowed'
           value={selectedDean}
@@ -320,7 +320,7 @@ const AssigningRoom = () => {
       </div>
 
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Instructor:</label>
+        <label className='font-medium w-32'>Who will teach ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedProfessor}
@@ -342,7 +342,7 @@ const AssigningRoom = () => {
 
       {/* Year Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Year Level:</label>
+        <label className='font-medium w-32'>What year level ?</label>
 
         <select
           className='select select-bordered flex-1'
@@ -354,7 +354,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What year level? 🎓
+            ...
           </option>
           {Object.keys(subjectsByYear).map((year) => (
             <option
@@ -368,7 +368,7 @@ const AssigningRoom = () => {
 
       {/* Subject Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Subject:</label>
+        <label className='font-medium w-32'>Select Course Code</label>
         <select
           className='select select-bordered flex-1'
           value={selectedSubject}
@@ -377,7 +377,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What lesson? 📘
+            ...
           </option>
           {subjectOptions.map((subj) => (
             <option
@@ -391,7 +391,7 @@ const AssigningRoom = () => {
 
       {/* Sections Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Section:</label>
+        <label className='font-medium w-32'>What Section ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedSection}
@@ -399,7 +399,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What section?
+            ...
           </option>
           {sections.map((sec) => (
             <option
@@ -413,7 +413,7 @@ const AssigningRoom = () => {
 
       {/* Building Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Building:</label>
+        <label className='font-medium w-32'>What Building ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedBuilding}
@@ -427,7 +427,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Location ?
+            ...
           </option>
           {buildings.map((b) => (
             <option
@@ -441,7 +441,7 @@ const AssigningRoom = () => {
 
       {/* Floor Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Floor Level:</label>
+        <label className='font-medium w-32'>What floor ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedFloor}
@@ -454,7 +454,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Select Level
+            ...
           </option>
           {floors.map((f) => {
             const floorNum = parseInt(f.replace(/\D/g, ''));
@@ -487,7 +487,7 @@ const AssigningRoom = () => {
       {rooms.length > 0 && (
         <div>
           <h3 className='text-md font-semibold mb-2 text-center'>
-            Select a Room
+            What Room ?
           </h3>
           <div className='grid grid-cols-5 gap-3'>
             {rooms.map((room) => (
@@ -510,7 +510,7 @@ const AssigningRoom = () => {
         <>
           {/* Start Time Dropdown */}
           <div className='flex items-center gap-4'>
-            <label className='font-medium w-32'>Class Starts at:</label>
+            <label className='font-medium w-32'>Class starts at:</label>
             <select
               className='select select-bordered flex-1'
               value={startTime}
@@ -615,7 +615,7 @@ const AssigningRoom = () => {
 
           {/* End Time Dropdown */}
           <div className='flex items-center gap-4'>
-            <label className='font-medium w-32'>End Time:</label>
+            <label className='font-medium w-32'>Class ends at:</label>
             <select
               className='select select-bordered flex-1'
               value={endTime}
