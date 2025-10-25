@@ -245,7 +245,7 @@ const AssigningRoom = () => {
         }
 
         for (const date of recurringDates) {
-          await axios.post('http://localhost:5001/api/rooms/assignments/', {
+          await axios.post(`${API_BASE}/api/rooms/assignments/`, {
             ...basePayload,
             date,
           });
@@ -253,7 +253,7 @@ const AssigningRoom = () => {
 
         toast.success('✅ Repeating schedule assigned!');
       } else {
-        await axios.post('http://localhost:5001/api/rooms/assignments/', {
+        await axios.post(`${API_BASE}/api/rooms/assignments/`, {
           ...basePayload,
           date: dateStr,
         });
