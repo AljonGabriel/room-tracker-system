@@ -9,26 +9,22 @@ const LoginComponent = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false); // 👈 loading state
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true); // 👈 start loading
 
     try {
-      // 1. Fetch all users (or just deans if your endpoint supports filtering)
       const { data: users } = await axios.get(
         `${API_BASE}/api/employees/getemp`,
-      ); // adjust endpoint
-
-      // 2. Filter only those with role === "Dean"
+      );
       const deans = users.filter((user) => user.role === 'Dean');
-
-      // 3. Match username and password
       const matchedDean = deans.find(
         (dean) => dean.username === email && dean.pwd === password,
       );
 
       if (matchedDean) {
-        // 4. Save fullName for access control
         localStorage.setItem('loggedInDean', matchedDean.fullName);
         navigate('/home');
       } else {
@@ -36,6 +32,8 @@ const LoginComponent = () => {
       }
     } catch (error) {
       toast.error('Login failed. Please check your connection.');
+    } finally {
+      setLoading(false); // 👈 stop loading
     }
   };
 
@@ -64,6 +62,7 @@ const LoginComponent = () => {
               className='input input-bordered w-full bg-base-100 text-base-content'
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -77,13 +76,20 @@ const LoginComponent = () => {
               className='input input-bordered w-full bg-base-100 text-base-content'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
 
           <button
             type='submit'
-            className='btn btn-primary w-full'>
-            Login
+            className={`btn btn-primary w-full ${
+              loading ? 'btn-disabled' : ''
+            }`}>
+            {loading ? (
+              <span className='loading loading-spinner loading-sm'></span>
+            ) : (
+              'Login'
+            )}
           </button>
         </form>
 
