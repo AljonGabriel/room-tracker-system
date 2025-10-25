@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import deanAccounts from '../data/accounts.js';
 import axios from 'axios';
 
 const LoginComponent = () => {
+  const API_BASE = import.meta.env.VITE_API_BASE;
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,7 +16,7 @@ const LoginComponent = () => {
     try {
       // 1. Fetch all users (or just deans if your endpoint supports filtering)
       const { data: users } = await axios.get(
-        'http://localhost:5001/api/employees/getemp',
+        `${API_BASE}/api/employees/getemp`,
       ); // adjust endpoint
 
       // 2. Filter only those with role === "Dean"
