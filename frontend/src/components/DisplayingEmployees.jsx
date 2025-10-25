@@ -18,7 +18,7 @@ const DisplayingEmployees = () => {
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${API_BASE}api/employees/getemp`);
+        const res = await axios.get(`${API_BASE}/api/employees/getemp`);
         setEmployees(res.data);
       } catch (error) {
         console.error(error);
