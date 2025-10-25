@@ -549,6 +549,11 @@ const AssigningRoom = () => {
                     entry.timeStart === selectedStart &&
                     entry.timeEnd === endTime,
                 );
+
+                console.log(
+                  'Matching entry for selected start:',
+                  matchingEntry,
+                );
                 const selectedBookingId = matchingEntry?._id;
 
                 // Check for duplicate start time (excluding current booking)

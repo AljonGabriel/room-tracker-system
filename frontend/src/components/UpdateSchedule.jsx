@@ -219,14 +219,16 @@ const UpdateSchedule = ({
               })
             }>
             <div className='grid grid-cols-1 gap-6 mb-6'>
+              <div className='grid grid-cols-1 gap-6 mb-6'>
+                <div>
+                  <h2 className='text-lg font-semibold text-base-content'>
+                    Schedule update :{' '}
+                    <span className='text-primary'>{prevSelectedProff}</span>
+                  </h2>
+                </div>
+              </div>
               {/* Dean Assigned */}
               <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
-                  {scheduledID}
-                </label>
-                <label className='block text-sm font-medium text-base-content'>
-                  {prevSelectedProff}
-                </label>
                 <label className='block text-sm font-medium text-base-content'>
                   Dean Assigned
                 </label>
@@ -242,7 +244,7 @@ const UpdateSchedule = ({
               {/* Year Selection */}
               <div className='space-y-2'>
                 <label className='block text-sm font-medium text-base-content'>
-                  Year
+                  What year level ?
                 </label>
                 <select
                   name='building'
@@ -255,7 +257,7 @@ const UpdateSchedule = ({
                   <option
                     disabled
                     value=''>
-                    Select Year Level
+                    ...
                   </option>
                   {Object.keys(subjectsByYear).map((year) => (
                     <option
@@ -277,21 +279,20 @@ const UpdateSchedule = ({
                 <div className='space-y-2'>
                   {/* Subject Selection */}
                   <label className='block text-sm font-medium text-base-content'>
-                    Subject
+                    Select Course Code
                   </label>
                   <select
-                    name='building'
+                    name='subject'
                     className='select select-bordered w-full'
                     value={updateSelectedSubject}
-                    onChange={(e) => {
-                      setUpdateSelectedSubject(e.target.value);
-                    }}
+                    onChange={(e) => setUpdateSelectedSubject(e.target.value)}
                     disabled={!updateSelectedYear}
                     required>
                     <option
+                      className='text-dark-gray'
                       disabled
                       value=''>
-                      Select Subject
+                      ...
                     </option>
                     {subjectOptions.map((subj) => (
                       <option
@@ -301,6 +302,7 @@ const UpdateSchedule = ({
                       </option>
                     ))}
                   </select>
+
                   <div className='text-xs text-gray-500 italic'>
                     Previous:{' '}
                     <span className='font-semibold text-gray-700'>
@@ -313,7 +315,7 @@ const UpdateSchedule = ({
               {/* Section Selection */}
               <div className='space-y-2'>
                 <label className='block text-sm font-medium text-base-content'>
-                  Section
+                  What Section ?
                 </label>
                 <select
                   name='building'
@@ -325,7 +327,7 @@ const UpdateSchedule = ({
                   <option
                     disabled
                     value=''>
-                    Select Section
+                    ...
                   </option>
                   {sections.map((sec) => (
                     <option
@@ -346,7 +348,7 @@ const UpdateSchedule = ({
               {/* Building Selection */}
               <div className='space-y-2'>
                 <label className='block text-sm font-medium text-base-content'>
-                  Building
+                  What Building ?
                 </label>
                 <select
                   name='building'
@@ -359,7 +361,7 @@ const UpdateSchedule = ({
                   <option
                     disabled
                     value=''>
-                    Select Building
+                    ...
                   </option>
                   {buildings.map((b) => (
                     <option
@@ -382,7 +384,7 @@ const UpdateSchedule = ({
                 <div className='space-y-2'>
                   {/* Floor Selection */}
                   <label className='block text-sm font-medium text-base-content'>
-                    Floor
+                    What floor ?
                   </label>
                   <select
                     name='floor'
@@ -398,7 +400,7 @@ const UpdateSchedule = ({
                     <option
                       disabled
                       value=''>
-                      Select Level
+                      ...
                     </option>
                     {floors.map((f) => {
                       const floorNum = parseInt(f.replace(/\D/g, ''));
@@ -423,7 +425,7 @@ const UpdateSchedule = ({
                   {rooms.length > 0 && (
                     <div className='mb-6'>
                       <label className='block text-sm font-medium text-base-content mb-2'>
-                        Select a Room
+                        What Room ?
                       </label>
                       <select
                         name='room'
@@ -434,7 +436,7 @@ const UpdateSchedule = ({
                         <option
                           disabled
                           value=''>
-                          Select Room
+                          ...
                         </option>
                         {rooms.map((room) => (
                           <option
@@ -525,7 +527,7 @@ const UpdateSchedule = ({
                   <option
                     disabled
                     value=''>
-                    Select Start
+                    ...
                   </option>
                   {timeSlots.map((slot) => {
                     const conflict = occupiedTimes.find(
@@ -579,7 +581,7 @@ const UpdateSchedule = ({
                   <option
                     disabled
                     value=''>
-                    Select time
+                    ...
                   </option>
                   {timeSlots.map((slot) => {
                     const conflict = (occupiedTimes || []).find(
