@@ -24,6 +24,12 @@ const UpdateSchedule = ({
   subjectsByYear,
   sections,
 }) => {
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
+
   const [updateSelectedYear, setUpdateSelectedYear] = useState('');
   const [updateSelectedSubject, setUpdateSelectedSubject] = useState('');
   const [updateSelectedSection, setUpdateSelectedSection] = useState('');
@@ -114,8 +120,6 @@ const UpdateSchedule = ({
       );
     });
 
-    console.log('hasconflictwithother updatemodal: ', hasConflictWithOthers);
-
     if (hasConflictWithOthers) {
       toast.error(
         'Selected time range overlaps with another Instructor schedule.',
@@ -139,7 +143,7 @@ const UpdateSchedule = ({
 
     try {
       await axios.put(
-        `http://localhost:5001/api/rooms/assignments/${scheduledID}`,
+        `${API_BASE}/api/rooms/assignments/${scheduledID}`,
         payload,
       );
 
@@ -168,8 +172,6 @@ const UpdateSchedule = ({
     }
     resetForms();
   };
-  console.log('🛠️ Editing scheduledID:', scheduledID);
-  console.log('🛠️ Editing selectedDate:', selectedDate);
 
   return (
     <>
@@ -187,7 +189,6 @@ const UpdateSchedule = ({
         id={`update-modal-${scheduledID}`}
         className='modal-toggle'
       />
-
       <div className='modal'>
         <div className='modal-box px-8 py-6 max-w-4xl w-full'>
           <form
@@ -540,7 +541,14 @@ const UpdateSchedule = ({
                     );
                     const isOccupied = !!conflict;
 
-                    let label = `${slot}`;
+                    const formattedTime = new Date(
+                      `1970-01-01T${slot}`,
+                    ).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+                    let label = `${formattedTime}`;
                     if (isOccupied) {
                       label += ` ${
                         conflict.professor?.fullName || 'Unknown'
@@ -600,7 +608,14 @@ const UpdateSchedule = ({
                     const isOccupiedByOther =
                       isOccupied && !isOwnedByCurrentProfessor;
 
-                    let label = `${slot}`;
+                    const formattedTime = new Date(
+                      `1970-01-01T${slot}`,
+                    ).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+                    let label = `${formattedTime}`;
                     if (isOccupied) {
                       label += ` — Instructor: ${conflict.professor?.fullName} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
                       if (nextConflict) {

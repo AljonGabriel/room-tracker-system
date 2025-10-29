@@ -4,6 +4,11 @@ import axios from 'axios';
 
 const DelSchedule = ({ scheduledID, assignedProf, onSetOccupiedTimes }) => {
   const handleDelete = async () => {
+    const isLocal = window.location.hostname === 'localhost';
+
+    const API_BASE = isLocal
+      ? 'http://localhost:5001' // 👈 your local backend
+      : import.meta.env.VITE_API_BASE; // 👈 your Render backend
     const confirmed = window.confirm(
       `Are you sure you want to delete the schedule for ${
         assignedProf || 'Unknown'
@@ -13,9 +18,7 @@ const DelSchedule = ({ scheduledID, assignedProf, onSetOccupiedTimes }) => {
     if (!confirmed) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5001/api/rooms/assignments/${scheduledID}`,
-      );
+      await axios.delete(`${API_BASE}/api/rooms/assignments/${scheduledID}`);
       toast.success(
         `Successfully deleted the schedule for ${assignedProf || 'Unknown'}`,
       );

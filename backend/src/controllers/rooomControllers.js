@@ -1,16 +1,20 @@
 import Room from '../models/Room.js';
 import mongoose from 'mongoose';
 
-//Get All Occupied Rooms
-// Get All Occupied Rooms (no filters)
+// 📦 Get All Occupied Rooms (future-only, no filters)
 export const getAllAssignments = async (req, res) => {
   try {
-    // ✅ Fetch all room assignments
-    const allAssignments = await Room.find().populate(
+    // ⏰ Normalize today's date to midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 🧠 Fetch all assignments from today onward
+    const allAssignments = await Room.find({ date: { $gte: today } }).populate(
       'professor',
       'fullName role',
     );
 
+    // 🧩 Format response for frontend
     const occupiedRooms = allAssignments.map((entry) => ({
       _id: entry._id,
       timeStart: entry.timeStart,
@@ -26,11 +30,12 @@ export const getAllAssignments = async (req, res) => {
       assignedBy: entry.assignedBy,
     }));
 
-    console.log('✅ All occupied rooms:', occupiedRooms.length);
+    console.log('✅ All occupied rooms (future only):', occupiedRooms.length);
 
+    // 🚀 Send response
     return res.status(200).json(occupiedRooms);
   } catch (error) {
-    console.error('❌ Error in getAllOccupiedRooms:', error);
+    console.error('❌ Error in getAllAssignments:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -102,7 +107,16 @@ export const getFilteredSchedule = async (req, res) => {
     let query = {};
 
     if (actualField === 'date') {
-      // Date logic stays the same
+      const selectedDate = new Date(value);
+      selectedDate.setHours(0, 0, 0, 0); // normalize to start of day
+
+      const nextDate = new Date(selectedDate);
+      nextDate.setDate(selectedDate.getDate() + 1); // next day start
+
+      query[actualField] = {
+        $gte: selectedDate,
+        $lt: nextDate,
+      };
     } else if (actualField === 'professor') {
       // ✅ Validate before casting
       if (mongoose.Types.ObjectId.isValid(value)) {

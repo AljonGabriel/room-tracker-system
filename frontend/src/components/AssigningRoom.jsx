@@ -10,6 +10,11 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const AssigningRoom = () => {
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
   const location = useLocation();
   const selectedDate = location.state?.selectedDate
     ? new Date(location.state.selectedDate)
@@ -51,7 +56,7 @@ const AssigningRoom = () => {
         const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-01"
 
         const res = await axios.get(
-          'http://localhost:5001/api/rooms/assignments/by-date',
+          `${API_BASE}/api/rooms/assignments/by-date`,
           {
             params: {
               room: selectedRoom,
@@ -106,9 +111,7 @@ const AssigningRoom = () => {
 
     const fetchEmployees = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5001/api/employees/getemp',
-        );
+        const res = await axios.get(`${API_BASE}/api/employees/getemp`);
         const allEmployees = res.data;
 
         const instructors = allEmployees
@@ -210,10 +213,9 @@ const AssigningRoom = () => {
   // Year and subject toggle
   const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
 
-  // Submit assignment to backend
   const handleAssignRoom = async () => {
     const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-02"
-    const repeating = isRepeating === 'Yes'; // dropdown value
+    const repeating = isRepeating === 'Yes';
 
     const basePayload = {
       year: selectedYear,
@@ -228,33 +230,35 @@ const AssigningRoom = () => {
       assignedBy: selectedDean,
       repeating,
     };
-    console.log('Instructors:', instructorList);
+
     try {
       if (repeating) {
         const weekday = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ...
-        const month = selectedDate.getMonth();
-        const year = selectedDate.getFullYear();
-        const totalDays = new Date(year, month + 1, 0).getDate();
+        const startDate = new Date(); // today
+        const endDate = new Date(startDate.getFullYear(), 11, 31); // Dec 31 of current year
 
         const recurringDates = [];
 
-        for (let day = 1; day <= totalDays; day++) {
-          const current = new Date(year, month, day);
+        for (
+          let current = new Date(startDate);
+          current <= endDate;
+          current.setDate(current.getDate() + 1)
+        ) {
           if (current.getDay() === weekday) {
-            recurringDates.push(current.toLocaleDateString('en-CA'));
+            recurringDates.push(new Date(current).toLocaleDateString('en-CA'));
           }
         }
 
         for (const date of recurringDates) {
-          await axios.post('http://localhost:5001/api/rooms/assignments/', {
+          await axios.post(`${API_BASE}/api/rooms/assignments/`, {
             ...basePayload,
             date,
           });
         }
 
-        toast.success('✅ Repeating schedule assigned!');
+        toast.success('✅ Year-long repeating schedule assigned!');
       } else {
-        await axios.post('http://localhost:5001/api/rooms/assignments/', {
+        await axios.post(`${API_BASE}/api/rooms/assignments/`, {
           ...basePayload,
           date: dateStr,
         });
@@ -311,7 +315,7 @@ const AssigningRoom = () => {
 
       {/* Dean Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Assigned by:</label>
+        <label className='font-medium w-32'>Dean Assigned:</label>
         <select
           className='select select-bordered flex-1 bg-base-200 cursor-not-allowed'
           value={selectedDean}
@@ -321,7 +325,7 @@ const AssigningRoom = () => {
       </div>
 
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Instructor:</label>
+        <label className='font-medium w-32'>Who will teach ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedProfessor}
@@ -329,7 +333,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Will teach by?
+            ...
           </option>
           {instructorList.map((prof) => (
             <option
@@ -343,7 +347,7 @@ const AssigningRoom = () => {
 
       {/* Year Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Year Level:</label>
+        <label className='font-medium w-32'>What year level ?</label>
 
         <select
           className='select select-bordered flex-1'
@@ -355,7 +359,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What year level? 🎓
+            ...
           </option>
           {Object.keys(subjectsByYear).map((year) => (
             <option
@@ -369,7 +373,7 @@ const AssigningRoom = () => {
 
       {/* Subject Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Subject:</label>
+        <label className='font-medium w-32'>Select Course Code</label>
         <select
           className='select select-bordered flex-1'
           value={selectedSubject}
@@ -378,7 +382,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What lesson? 📘
+            ...
           </option>
           {subjectOptions.map((subj) => (
             <option
@@ -392,7 +396,7 @@ const AssigningRoom = () => {
 
       {/* Sections Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Section:</label>
+        <label className='font-medium w-32'>What Section ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedSection}
@@ -400,7 +404,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            What section?
+            ...
           </option>
           {sections.map((sec) => (
             <option
@@ -414,7 +418,7 @@ const AssigningRoom = () => {
 
       {/* Building Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Building:</label>
+        <label className='font-medium w-32'>What Building ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedBuilding}
@@ -428,7 +432,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Location ?
+            ...
           </option>
           {buildings.map((b) => (
             <option
@@ -442,7 +446,7 @@ const AssigningRoom = () => {
 
       {/* Floor Dropdown */}
       <div className='flex items-center gap-4'>
-        <label className='font-medium w-32'>Floor Level:</label>
+        <label className='font-medium w-32'>What floor ?</label>
         <select
           className='select select-bordered flex-1'
           value={selectedFloor}
@@ -455,7 +459,7 @@ const AssigningRoom = () => {
           <option
             disabled
             value=''>
-            Select Level
+            ...
           </option>
           {floors.map((f) => {
             const floorNum = parseInt(f.replace(/\D/g, ''));
@@ -472,7 +476,7 @@ const AssigningRoom = () => {
 
       <div className='flex items-center gap-4'>
         <label className='text-sm font-medium min-w-[200px]'>
-          Repeat this schedule weekly?
+          Permanent Schedule?
         </label>
 
         <select
@@ -488,7 +492,7 @@ const AssigningRoom = () => {
       {rooms.length > 0 && (
         <div>
           <h3 className='text-md font-semibold mb-2 text-center'>
-            Select a Room
+            What Room ?
           </h3>
           <div className='grid grid-cols-5 gap-3'>
             {rooms.map((room) => (
@@ -511,7 +515,7 @@ const AssigningRoom = () => {
         <>
           {/* Start Time Dropdown */}
           <div className='flex items-center gap-4'>
-            <label className='font-medium w-32'>Class Starts at:</label>
+            <label className='font-medium w-32'>Class starts at:</label>
             <select
               className='select select-bordered flex-1'
               value={startTime}
@@ -590,7 +594,14 @@ const AssigningRoom = () => {
                 );
                 const isOccupied = !!conflict;
 
-                let label = `${slot}`;
+                const formattedTime = new Date(
+                  `1970-01-01T${slot}`,
+                ).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+                let label = `${formattedTime}`;
                 if (isOccupied) {
                   label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room
@@ -621,7 +632,7 @@ const AssigningRoom = () => {
 
           {/* End Time Dropdown */}
           <div className='flex items-center gap-4'>
-            <label className='font-medium w-32'>End Time:</label>
+            <label className='font-medium w-32'>Class ends at:</label>
             <select
               className='select select-bordered flex-1'
               value={endTime}
@@ -637,7 +648,14 @@ const AssigningRoom = () => {
                 );
                 const isOccupied = !!conflict;
 
-                let label = slot;
+                const formattedTime = new Date(
+                  `1970-01-01T${slot}`,
+                ).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+                let label = `${formattedTime}`;
                 if (isOccupied && conflict) {
                   label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room

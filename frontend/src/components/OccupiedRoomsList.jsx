@@ -8,14 +8,18 @@ import subjectsByYear from '../data/subjectsByYear.js';
 import sections from '../data/sections.js';
 
 const OccupiedRoomsList = () => {
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
+
   const [occupiedRooms, setOccupiedRooms] = useState([]);
 
   useEffect(() => {
     const getOccupiedRooms = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:5001/api/rooms/assignments',
-        );
+        const res = await axios.get(`${API_BASE}/api/rooms/assignments`);
 
         const expanded = res.data.flatMap(
           ({
@@ -121,7 +125,7 @@ const OccupiedRoomsList = () => {
   console.log('Occupied Rooms Data:', occupiedRooms);
   return (
     <div className='max-w-3xl mx-auto space-y-2 mt-10'>
-      {/* Legend */}
+      {/* 🧭 Legend: Unique Professors */}
       <div className='mb-4 flex flex-wrap gap-4 items-center'>
         {Array.from(
           new Map(
@@ -143,7 +147,8 @@ const OccupiedRoomsList = () => {
           );
         })}
       </div>
-      {/* Grouped Slot Display */}
+
+      {/* 📚 Grouped Slot Display by Professor → Weekday */}
       {Object.entries(groupedByProfessor).map(([profId, group]) => {
         const professor = group?.professor;
         const slots = Array.isArray(group?.slots) ? group.slots : [];
@@ -158,6 +163,7 @@ const OccupiedRoomsList = () => {
                 (s) =>
                   s.timeStart === slot.timeStart &&
                   s.timeEnd === slot.timeEnd &&
+                  s.date === slot.date &&
                   s.professor?._id === slot.professor?._id,
               ) === index
             );
@@ -168,82 +174,126 @@ const OccupiedRoomsList = () => {
             return timeA - timeB;
           });
 
-        console.log(`Rendering slots for Professor ${name}:`, uniqueSlots);
+        // 🗓️ Group slots by weekday
+        const slotsByWeekday = uniqueSlots.reduce((acc, slot) => {
+          const weekday = new Date(slot.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+          });
+          if (!acc[weekday]) acc[weekday] = [];
+          acc[weekday].push(slot);
+          return acc;
+        }, {});
+
+        // 📅 Sort weekdays Monday → Sunday
+        const weekdayOrder = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday',
+        ];
+        const sortedWeekdays = weekdayOrder.filter(
+          (day) => slotsByWeekday[day],
+        );
 
         return (
           <div
             key={profId}
-            className={`border-2 rounded p-4 bg-neutral text-neutral-content ${border}`}>
+            className={`border-2 rounded p-4 bg-neutral text-neutral-content h-[400px] overflow-y-auto ${border}`}>
             <div className='mb-2 text-md font-bold'>{name}</div>
 
-            <div className='space-y-2'>
-              {uniqueSlots.map((slot, index) => (
-                <div
-                  key={slot._id || index}
-                  className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
-                  <div className='text-sm text-base-content space-y-1'>
-                    {console.log('🔍 Slot:', slot)}
-                    {slot._id}
-                    <div>
-                      🕒 <strong>{slot.timeStart}</strong>–
-                      <strong>{slot.timeEnd}</strong> on{' '}
-                      {new Date(slot.date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </div>
-                    <div>
-                      🏫 <strong>{slot.building}</strong>, Floor{' '}
-                      <strong>{slot.floor}</strong>, Room{' '}
-                      <strong>{slot.room}</strong>
-                    </div>
-                    <div>
-                      🎓 <strong>{slot.year}</strong> | 📘{' '}
-                      <strong>{slot.subject}</strong> | 🧑‍🏫{' '}
-                      <strong>{slot.section}</strong>
-                    </div>
-                  </div>
-                  {loggedInDean === slot.assignedBy ? (
-                    <div className='flex gap-2 mt-3'>
-                      <UpdateSchedule
-                        prevSelectedFloor={slot.floor}
-                        prevSelectedRoom={slot.room}
-                        selectedDate={slot.date}
-                        selectedDean={slot.assignedBy}
-                        prevSelectedYear={slot.year}
-                        prevSelectedSubject={slot.subject}
-                        prevSelectedSection={slot.section}
-                        prevSelectedBuilding={slot.building}
-                        buildingData={buildingData}
-                        prevSelectedProff={
-                          slot.professor?.fullName || 'Unknown'
-                        }
-                        scheduledID={slot._id}
-                        slotData={slot}
-                        timeEnd={slot.timeEnd}
-                        timeStart={slot.timeStart}
-                        timeSlots={timeSlots}
-                        occupiedTimes={occupiedRooms}
-                        onSetOccupiedTimes={setOccupiedRooms}
-                        subjectsByYear={subjectsByYear}
-                        sections={sections}
-                      />
-
-                      <DelSchedule
-                        scheduledID={slot._id}
-                        assignedProf={slot.professor.fullName}
-                        onSetOccupiedTimes={setOccupiedRooms}
-                      />
-                    </div>
-                  ) : (
-                    <span>
-                      Assigned by: <strong>{slot.assignedBy}</strong>
-                    </span>
-                  )}
+            {/* 🔄 Render slots grouped by weekday */}
+            {sortedWeekdays.map((weekday) => (
+              <div key={weekday}>
+                <div className='text-sm font-semibold mt-4 mb-2 underline'>
+                  {weekday}
                 </div>
-              ))}
-            </div>
+                <div className='space-y-2'>
+                  {slotsByWeekday[weekday].map((slot, index) => (
+                    <div
+                      key={slot._id || index}
+                      className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
+                      <div className='text-sm text-base-content space-y-1'>
+                        <div>
+                          <span>
+                            {new Date(
+                              `1970-01-01T${slot.timeStart}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            })}{' '}
+                            –{' '}
+                            {new Date(
+                              `1970-01-01T${slot.timeEnd}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            })}
+                          </span>{' '}
+                          on{' '}
+                          {new Date(slot.date).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <div>
+                          <strong>{slot.building}</strong>, Floor{' '}
+                          <strong>{slot.floor}</strong>, Room{' '}
+                          <strong>{slot.room}</strong>
+                        </div>
+                        <div>
+                          <strong>{slot.year}</strong> |{' '}
+                          <strong>{slot.subject}</strong> |{' '}
+                          <strong>{slot.section}</strong>
+                        </div>
+                      </div>
+                      {loggedInDean === slot.assignedBy ? (
+                        <div className='flex gap-2 mt-3'>
+                          <UpdateSchedule
+                            prevSelectedFloor={slot.floor}
+                            prevSelectedRoom={slot.room}
+                            selectedDate={slot.date}
+                            selectedDean={slot.assignedBy}
+                            prevSelectedYear={slot.year}
+                            prevSelectedSubject={slot.subject}
+                            prevSelectedSection={slot.section}
+                            prevSelectedBuilding={slot.building}
+                            buildingData={buildingData}
+                            prevSelectedProff={
+                              slot.professor?.fullName || 'Unknown'
+                            }
+                            scheduledID={slot._id}
+                            slotData={slot}
+                            timeEnd={slot.timeEnd}
+                            timeStart={slot.timeStart}
+                            timeSlots={timeSlots}
+                            occupiedTimes={occupiedRooms}
+                            onSetOccupiedTimes={setOccupiedRooms}
+                            subjectsByYear={subjectsByYear}
+                            sections={sections}
+                          />
+                          <DelSchedule
+                            scheduledID={slot._id}
+                            assignedProf={slot.professor.fullName}
+                            onSetOccupiedTimes={setOccupiedRooms}
+                          />
+                        </div>
+                      ) : (
+                        <span>
+                          Assigned by: <strong>{slot.assignedBy}</strong>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         );
       })}
