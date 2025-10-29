@@ -217,8 +217,24 @@ const OccupiedRoomsList = () => {
                       className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
                       <div className='text-sm text-base-content space-y-1'>
                         <div>
-                          <strong>{slot.timeStart}</strong>–
-                          <strong>{slot.timeEnd}</strong> on{' '}
+                          <span>
+                            {new Date(
+                              `1970-01-01T${slot.timeStart}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            })}{' '}
+                            –{' '}
+                            {new Date(
+                              `1970-01-01T${slot.timeEnd}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true,
+                            })}
+                          </span>{' '}
+                          on{' '}
                           {new Date(slot.date).toLocaleDateString('en-US', {
                             weekday: 'long',
                             month: 'short',

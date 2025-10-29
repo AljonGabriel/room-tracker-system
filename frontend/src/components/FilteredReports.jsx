@@ -359,7 +359,21 @@ const FilteredReports = () => {
                                   </td>
                                   <td>
                                     <span>
-                                      {entry.timeStart} - {entry.timeEnd}
+                                      {new Date(
+                                        `1970-01-01T${entry.timeStart}`,
+                                      ).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                      })}{' '}
+                                      –{' '}
+                                      {new Date(
+                                        `1970-01-01T${entry.timeEnd}`,
+                                      ).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                      })}
                                     </span>
                                   </td>
                                   <td>{entry.room}</td>
