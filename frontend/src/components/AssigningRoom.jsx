@@ -589,7 +589,14 @@ const AssigningRoom = () => {
                 );
                 const isOccupied = !!conflict;
 
-                let label = `${slot}`;
+                const formattedTime = new Date(
+                  `1970-01-01T${slot}`,
+                ).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+                let label = `${formattedTime}`;
                 if (isOccupied) {
                   label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room
@@ -636,7 +643,14 @@ const AssigningRoom = () => {
                 );
                 const isOccupied = !!conflict;
 
-                let label = slot;
+                const formattedTime = new Date(
+                  `1970-01-01T${slot}`,
+                ).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+                let label = `${formattedTime}`;
                 if (isOccupied && conflict) {
                   label += ` ${conflict.professor?.fullName || 'Unknown'} • ${
                     conflict.room

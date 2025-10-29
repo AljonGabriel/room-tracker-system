@@ -541,7 +541,14 @@ const UpdateSchedule = ({
                     );
                     const isOccupied = !!conflict;
 
-                    let label = `${slot}`;
+                    const formattedTime = new Date(
+                      `1970-01-01T${slot}`,
+                    ).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+                    let label = `${formattedTime}`;
                     if (isOccupied) {
                       label += ` ${
                         conflict.professor?.fullName || 'Unknown'
@@ -601,7 +608,14 @@ const UpdateSchedule = ({
                     const isOccupiedByOther =
                       isOccupied && !isOwnedByCurrentProfessor;
 
-                    let label = `${slot}`;
+                    const formattedTime = new Date(
+                      `1970-01-01T${slot}`,
+                    ).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+                    let label = `${formattedTime}`;
                     if (isOccupied) {
                       label += ` — Instructor: ${conflict.professor?.fullName} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
                       if (nextConflict) {
