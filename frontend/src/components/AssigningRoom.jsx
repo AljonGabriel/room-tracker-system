@@ -10,7 +10,11 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const AssigningRoom = () => {
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
   const location = useLocation();
   const selectedDate = location.state?.selectedDate
     ? new Date(location.state.selectedDate)

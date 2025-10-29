@@ -24,7 +24,11 @@ const UpdateSchedule = ({
   subjectsByYear,
   sections,
 }) => {
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
 
   const [updateSelectedYear, setUpdateSelectedYear] = useState('');
   const [updateSelectedSubject, setUpdateSelectedSubject] = useState('');

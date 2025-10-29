@@ -4,7 +4,11 @@ import axios from 'axios';
 
 const DelSchedule = ({ scheduledID, assignedProf, onSetOccupiedTimes }) => {
   const handleDelete = async () => {
-    const API_BASE = import.meta.env.VITE_API_BASE;
+    const isLocal = window.location.hostname === 'localhost';
+
+    const API_BASE = isLocal
+      ? 'http://localhost:5001' // 👈 your local backend
+      : import.meta.env.VITE_API_BASE; // 👈 your Render backend
     const confirmed = window.confirm(
       `Are you sure you want to delete the schedule for ${
         assignedProf || 'Unknown'

@@ -4,7 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const LoginComponent = () => {
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  const isLocal = window.location.hostname === 'localhost';
+
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');

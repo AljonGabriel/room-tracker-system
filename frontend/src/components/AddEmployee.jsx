@@ -3,7 +3,13 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
 const AddEmployee = ({ setEmployees }) => {
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  const isLocal = window.location.hostname === 'localhost';
+
+  console.log('isLocal', isLocal);
+  const API_BASE = isLocal
+    ? 'http://localhost:5001' // 👈 your local backend
+    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
+
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('');
 
