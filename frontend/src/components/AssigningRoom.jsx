@@ -213,10 +213,9 @@ const AssigningRoom = () => {
   // Year and subject toggle
   const subjectOptions = selectedYear ? subjectsByYear[selectedYear] : [];
 
-  // Submit assignment to backend
   const handleAssignRoom = async () => {
     const dateStr = selectedDate.toLocaleDateString('en-CA'); // → "2025-09-02"
-    const repeating = isRepeating === 'Yes'; // dropdown value
+    const repeating = isRepeating === 'Yes';
 
     const basePayload = {
       year: selectedYear,
@@ -231,20 +230,22 @@ const AssigningRoom = () => {
       assignedBy: selectedDean,
       repeating,
     };
-    console.log('Instructors:', instructorList);
+
     try {
       if (repeating) {
         const weekday = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ...
-        const month = selectedDate.getMonth();
-        const year = selectedDate.getFullYear();
-        const totalDays = new Date(year, month + 1, 0).getDate();
+        const startDate = new Date(); // today
+        const endDate = new Date(startDate.getFullYear(), 11, 31); // Dec 31 of current year
 
         const recurringDates = [];
 
-        for (let day = 1; day <= totalDays; day++) {
-          const current = new Date(year, month, day);
+        for (
+          let current = new Date(startDate);
+          current <= endDate;
+          current.setDate(current.getDate() + 1)
+        ) {
           if (current.getDay() === weekday) {
-            recurringDates.push(current.toLocaleDateString('en-CA'));
+            recurringDates.push(new Date(current).toLocaleDateString('en-CA'));
           }
         }
 
@@ -255,7 +256,7 @@ const AssigningRoom = () => {
           });
         }
 
-        toast.success('✅ Repeating schedule assigned!');
+        toast.success('✅ Year-long repeating schedule assigned!');
       } else {
         await axios.post(`${API_BASE}/api/rooms/assignments/`, {
           ...basePayload,
@@ -475,7 +476,7 @@ const AssigningRoom = () => {
 
       <div className='flex items-center gap-4'>
         <label className='text-sm font-medium min-w-[200px]'>
-          Repeat this schedule weekly?
+          Permanent Schedule?
         </label>
 
         <select

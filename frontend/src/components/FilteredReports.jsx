@@ -342,36 +342,40 @@ const FilteredReports = () => {
                         </thead>
                         <tbody>
                           {Array.isArray(entries) ? (
-                            entries.map((entry, index) => (
-                              <tr
-                                key={entry._id}
-                                className={
-                                  index % 2 === 0
-                                    ? 'bg-gray-500'
-                                    : 'bg-gray-600'
-                                }>
-                                <td>
-                                  {new Date(entry.date).toLocaleDateString()}
-                                </td>
-                                <td>
-                                  <span>
-                                    {entry.timeStart} - {entry.timeEnd}
-                                  </span>
-                                </td>
-                                <td>{entry.room}</td>
-                                <td>{entry.floor}</td>
-                                <td>{entry.building}</td>
-                                <td>{entry.subject}</td>
-                                <td>{entry.year}</td>
-                                <td className='text-sm border-r border-white'>
-                                  {entry.section}
-                                </td>
-                                <td>{entry.professor?.fullName}</td>
-                                <td className='text-sm text-white'>
-                                  {entry.assignedBy}
-                                </td>
-                              </tr>
-                            ))
+                            [...entries]
+                              .sort(
+                                (a, b) => new Date(a.date) - new Date(b.date),
+                              )
+                              .map((entry, index) => (
+                                <tr
+                                  key={entry._id}
+                                  className={
+                                    index % 2 === 0
+                                      ? 'bg-gray-500'
+                                      : 'bg-gray-600'
+                                  }>
+                                  <td>
+                                    {new Date(entry.date).toLocaleDateString()}
+                                  </td>
+                                  <td>
+                                    <span>
+                                      {entry.timeStart} - {entry.timeEnd}
+                                    </span>
+                                  </td>
+                                  <td>{entry.room}</td>
+                                  <td>{entry.floor}</td>
+                                  <td>{entry.building}</td>
+                                  <td>{entry.subject}</td>
+                                  <td>{entry.year}</td>
+                                  <td className='text-sm border-r border-white'>
+                                    {entry.section}
+                                  </td>
+                                  <td>{entry.professor?.fullName}</td>
+                                  <td className='text-sm text-white'>
+                                    {entry.assignedBy}
+                                  </td>
+                                </tr>
+                              ))
                           ) : (
                             <tr>
                               <td
