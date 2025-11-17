@@ -502,16 +502,21 @@ const AssigningRoom = () => {
                   const selectedDateStr =
                     selectedDate.toLocaleDateString("en-CA");
 
-                  // Filter entries for same room and date
-                  const sameDayEntries = occupiedTimes.filter((entry) => {
-                    const entryDateStr = new Date(
-                      entry.date
-                    ).toLocaleDateString("en-CA");
-                    return entryDateStr === selectedDateStr;
-                  });
+                  // ✅ Filter entries for same room and date
+                  const sameRoomSameDayEntries = occupiedTimes.filter(
+                    (entry) => {
+                      const entryDateStr = new Date(
+                        entry.date
+                      ).toLocaleDateString("en-CA");
+                      return (
+                        entryDateStr === selectedDateStr &&
+                        entry.room === selectedRoom
+                      );
+                    }
+                  );
 
-                  // Check if selectedStart is inside any occupied range (excluding exact end match)
-                  const isInsideOccupiedRange = sameDayEntries.some(
+                  // ✅ Check if selectedStart is inside any occupied range (excluding exact end match)
+                  const isInsideOccupiedRange = sameRoomSameDayEntries.some(
                     (entry) =>
                       selectedStart >= entry.timeStart &&
                       selectedStart < entry.timeEnd &&
@@ -525,21 +530,17 @@ const AssigningRoom = () => {
                     return;
                   }
 
-                  // Find current booking ID (if editing an existing entry)
-                  const matchingEntry = sameDayEntries.find(
+                  // ✅ Find current booking ID (if editing an existing entry)
+                  const matchingEntry = sameRoomSameDayEntries.find(
                     (entry) =>
                       entry.timeStart === selectedStart &&
                       entry.timeEnd === endTime
                   );
 
-                  console.log(
-                    "Matching entry for selected start:",
-                    matchingEntry
-                  );
                   const selectedBookingId = matchingEntry?._id;
 
-                  // Check for duplicate start time (excluding current booking)
-                  const isStartTimeAlreadyTaken = sameDayEntries.some(
+                  // ✅ Check for duplicate start time (excluding current booking)
+                  const isStartTimeAlreadyTaken = sameRoomSameDayEntries.some(
                     (entry) =>
                       entry.timeStart === selectedStart &&
                       entry._id !== selectedBookingId
@@ -553,7 +554,7 @@ const AssigningRoom = () => {
                     return;
                   }
 
-                  // All good — set the selected start time
+                  // ✅ All good — set the selected start time
                   setStartTime(selectedStart);
                 }}
               >
@@ -561,14 +562,23 @@ const AssigningRoom = () => {
                   Start:
                 </option>
                 {timeSlots.map((slot) => {
+                  // ✅ Filter conflicts for selected room and date only
                   const conflict = occupiedTimes.find(
-                    (entry) => entry.slot === slot
+                    (entry) =>
+                      entry.slot === slot &&
+                      entry.room === selectedRoom &&
+                      new Date(entry.date).toLocaleDateString("en-CA") ===
+                        selectedDate.toLocaleDateString("en-CA")
                   );
+
                   const nextConflict = occupiedTimes.find(
                     (entry) =>
                       entry.timeStart === conflict?.timeEnd &&
-                      entry.room === selectedRoom
+                      entry.room === selectedRoom &&
+                      new Date(entry.date).toLocaleDateString("en-CA") ===
+                        selectedDate.toLocaleDateString("en-CA")
                   );
+
                   const isOccupied = !!conflict;
 
                   const formattedTime = new Date(
@@ -578,6 +588,7 @@ const AssigningRoom = () => {
                     minute: "2-digit",
                     hour12: true,
                   });
+
                   let label = `${formattedTime}`;
                   if (isOccupied) {
                     label += ` ${conflict.professor?.fullName || "Unknown"} • ${
