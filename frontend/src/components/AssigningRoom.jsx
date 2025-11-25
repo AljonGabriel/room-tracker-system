@@ -185,9 +185,6 @@ const AssigningRoom = () => {
 
   const colors = colorPalette;
 
-  console.log(sections);
-  console.log(selectedYear);
-
   // Assign a consistent color to each unique name using a cache
   const getColorClass = (() => {
     const cache = {};
@@ -368,7 +365,7 @@ const AssigningRoom = () => {
             </option>
             {Object.keys(sections).map((year) => (
               <option key={year} value={year}>
-                {year} Year
+                {year}
               </option>
             ))}
           </select>
@@ -563,7 +560,7 @@ const AssigningRoom = () => {
                 }}
               >
                 <option disabled value="">
-                  Start:
+                  ...
                 </option>
                 {timeSlots.map((slot) => {
                   // ✅ Filter conflicts for selected room and date only
@@ -632,11 +629,15 @@ const AssigningRoom = () => {
                 onChange={(e) => setEndTime(e.target.value)}
               >
                 <option disabled value="">
-                  Select End
+                  ...
                 </option>
                 {timeSlots.map((slot) => {
                   const conflict = occupiedTimes.find(
-                    (entry) => entry.slot === slot
+                    (entry) =>
+                      entry.slot === slot &&
+                      entry.room === selectedRoom &&
+                      new Date(entry.date).toLocaleDateString("en-CA") ===
+                        selectedDate.toLocaleDateString("en-CA")
                   );
                   const isOccupied = !!conflict;
 

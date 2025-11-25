@@ -1,6 +1,6 @@
 const buildingLayouts = {
   "Main building right wing": {
-    "Ground Floor": {
+    1: {
       rooms: [
         "R201",
         "R202 - Computer Lab 7",
@@ -77,26 +77,39 @@ const buildingLayouts = {
         "L206 - Speech Lab",
         "L207 - Computer Lab 5",
         "L208 - Computer Lab 6",
-        "LT09 - Cisco Lab",
-        "LT10 - Faculty Room",
+        "L209 - Cisco Lab",
+        "L210 - Faculty Room",
       ],
       image: "/assets/floorplans/mainbuilding-left-2nd.jpg",
     },
     3: {
       rooms: [
+        "L301",
+        "L302",
+        "L303",
+        "L304",
+        "L305",
         "L306",
         "L307",
         "L308",
         "L309",
         "L310",
-        "L311",
-        "R301 - BLIS Lab",
-        "R311 - Audio Visual Room",
       ],
       image: "/assets/floorplans/mainbuilding-left-3rd.jpg",
     },
     4: {
-      rooms: ["L401", "L406", "L407", "L408", "L409", "L410", "L411"],
+      rooms: [
+        "L401",
+        "L402",
+        "L403",
+        "L404",
+        "L404",
+        "L406",
+        "L407",
+        "L408",
+        "L409",
+        "L410",
+      ],
       image: "/assets/floorplans/mainbuilding-left-4th.jpg",
     },
   },

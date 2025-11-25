@@ -1,7 +1,7 @@
-import axios from 'axios';
-import React from 'react';
-import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import axios from "axios";
+import React from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 const UpdateSchedule = ({
   prevSelectedFloor,
@@ -24,21 +24,21 @@ const UpdateSchedule = ({
   subjectsByYear,
   sections,
 }) => {
-  const isLocal = window.location.hostname === 'localhost';
+  const isLocal = window.location.hostname === "localhost";
 
   const API_BASE = isLocal
-    ? 'http://localhost:5001' // 👈 your local backend
+    ? "http://localhost:5001" // 👈 your local backend
     : import.meta.env.VITE_API_BASE; // 👈 your Render backend
 
-  const [updateSelectedYear, setUpdateSelectedYear] = useState('');
-  const [updateSelectedSubject, setUpdateSelectedSubject] = useState('');
-  const [updateSelectedSection, setUpdateSelectedSection] = useState('');
+  const [updateSelectedYear, setUpdateSelectedYear] = useState("");
+  const [updateSelectedSubject, setUpdateSelectedSubject] = useState("");
+  const [updateSelectedSection, setUpdateSelectedSection] = useState("");
 
-  const [updateSelectedBuilding, setUpdateSelectedBuilding] = useState('');
-  const [updateSelectedFloor, setUpdateSelectedFloor] = useState('');
-  const [updateSelectedRoom, setUpdateSelectedRoom] = useState('');
-  const [updateStartTime, setUpdateStartTime] = useState('');
-  const [updateEndTime, setUpdateEndTime] = useState('');
+  const [updateSelectedBuilding, setUpdateSelectedBuilding] = useState("");
+  const [updateSelectedFloor, setUpdateSelectedFloor] = useState("");
+  const [updateSelectedRoom, setUpdateSelectedRoom] = useState("");
+  const [updateStartTime, setUpdateStartTime] = useState("");
+  const [updateEndTime, setUpdateEndTime] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,26 +48,28 @@ const UpdateSchedule = ({
     : [];
 
   const rooms = updateSelectedFloor
-    ? buildingData[updateSelectedBuilding][updateSelectedFloor]
+    ? buildingData[updateSelectedBuilding][updateSelectedFloor]?.rooms || []
     : [];
-
   // Year and subject toggle
   const subjectOptions = updateSelectedYear
     ? subjectsByYear[updateSelectedYear]
     : [];
 
+  console.log(updateSelectedYear);
+  console.log(sections);
+
   const resetForms = () => {
-    setUpdateSelectedYear('');
-    setUpdateSelectedSection('');
-    setUpdateSelectedSubject('');
-    setUpdateSelectedBuilding('');
-    setUpdateSelectedFloor('');
-    setUpdateSelectedRoom('');
-    setUpdateStartTime('');
-    setUpdateEndTime('');
+    setUpdateSelectedYear("");
+    setUpdateSelectedSection("");
+    setUpdateSelectedSubject("");
+    setUpdateSelectedBuilding("");
+    setUpdateSelectedFloor("");
+    setUpdateSelectedRoom("");
+    setUpdateStartTime("");
+    setUpdateEndTime("");
   };
 
-  console.log('Occupiedtimes updatemodal:', occupiedTimes);
+  console.log("Occupiedtimes updatemodal:", occupiedTimes);
 
   const handleCancelUpdate = () => {
     resetForms();
@@ -103,11 +105,11 @@ const UpdateSchedule = ({
     e.preventDefault();
 
     if (!selectedDate) {
-      toast.error('❌ No date selected.');
+      toast.error("❌ No date selected.");
       return;
     }
 
-    const dateStr = new Date(selectedDate).toLocaleDateString('en-CA');
+    const dateStr = new Date(selectedDate).toLocaleDateString("en-CA");
 
     // ✅ Conflict check
     const hasConflictWithOthers = occupiedTimes.some((entry) => {
@@ -122,7 +124,7 @@ const UpdateSchedule = ({
 
     if (hasConflictWithOthers) {
       toast.error(
-        'Selected time range overlaps with another Instructor schedule.',
+        "Selected time range overlaps with another Instructor schedule."
       );
       return;
     }
@@ -144,7 +146,7 @@ const UpdateSchedule = ({
     try {
       await axios.put(
         `${API_BASE}/api/rooms/assignments/${scheduledID}`,
-        payload,
+        payload
       );
 
       const updatedRecord = {
@@ -157,18 +159,16 @@ const UpdateSchedule = ({
 
       // ✅ Update occupiedTimes directly
       onSetOccupiedTimes((prev) =>
-        prev.map((entry) =>
-          entry._id === scheduledID ? updatedRecord : entry,
-        ),
+        prev.map((entry) => (entry._id === scheduledID ? updatedRecord : entry))
       );
 
       resetForms();
 
-      toast.success('✅ Schedule updated successfully!');
+      toast.success("✅ Schedule updated successfully!");
       document.getElementById(`update-modal-${scheduledID}`).checked = false;
     } catch (error) {
-      console.error('Update failed:', error);
-      toast.error('❌ Failed to update schedule. Please try again.');
+      console.error("Update failed:", error);
+      toast.error("❌ Failed to update schedule. Please try again.");
     }
     resetForms();
   };
@@ -176,21 +176,22 @@ const UpdateSchedule = ({
   return (
     <>
       <button
-        className='btn btn-sm btn-accent'
+        className="btn btn-sm btn-accent"
         onClick={() => {
           document.getElementById(`update-modal-${scheduledID}`).checked = true;
-        }}>
+        }}
+      >
         Edit
       </button>
 
       {/* Modal */}
       <input
-        type='checkbox'
+        type="checkbox"
         id={`update-modal-${scheduledID}`}
-        className='modal-toggle'
+        className="modal-toggle"
       />
-      <div className='modal'>
-        <div className='modal-box px-8 py-6 max-w-4xl w-full'>
+      <div className="modal">
+        <div className="modal-box px-8 py-6 max-w-4xl w-full">
           <form
             onSubmit={(e) =>
               handleScheduleUpdate({
@@ -218,24 +219,25 @@ const UpdateSchedule = ({
                 selectedDean,
                 selectedDate,
               })
-            }>
-            <div className='grid grid-cols-1 gap-6 mb-6'>
-              <div className='grid grid-cols-1 gap-6 mb-6'>
+            }
+          >
+            <div className="grid grid-cols-1 gap-6 mb-6">
+              <div className="grid grid-cols-1 gap-6 mb-6">
                 <div>
-                  <h2 className='text-lg font-semibold text-base-content'>
-                    Schedule update :{' '}
-                    <span className='text-primary'>{prevSelectedProff}</span>
+                  <h2 className="text-lg font-semibold text-base-content">
+                    Schedule update :{" "}
+                    <span className="text-primary">{prevSelectedProff}</span>
                   </h2>
                 </div>
               </div>
               {/* Dean Assigned */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
                   Dean Assigned
                 </label>
                 <input
-                  type='text'
-                  className='input input-bordered w-full bg-base-300 text-center font-semibold'
+                  type="text"
+                  className="input input-bordered w-full bg-base-300 text-center font-semibold"
                   value={selectedDean}
                   readOnly
                   disabled
@@ -243,213 +245,196 @@ const UpdateSchedule = ({
               </div>
 
               {/* Year Selection */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
                   What year level ?
                 </label>
                 <select
-                  name='building'
-                  className='select select-bordered w-full'
+                  name="building"
+                  className="select select-bordered w-full"
                   value={updateSelectedYear}
                   onChange={(e) => {
                     setUpdateSelectedYear(e.target.value);
+                    setUpdateSelectedSection("");
                   }}
-                  disabled={!selectedDean}>
-                  <option
-                    disabled
-                    value=''>
+                  disabled={!selectedDean}
+                >
+                  <option disabled value="">
                     ...
                   </option>
-                  {Object.keys(subjectsByYear).map((year) => (
-                    <option
-                      key={year}
-                      value={year}>
+                  {Object.keys(sections).map((year) => (
+                    <option key={year} value={year}>
                       {year}
                     </option>
                   ))}
                 </select>
-                <div className='text-xs text-gray-500 italic'>
-                  Previous:{' '}
-                  <span className='font-semibold text-gray-700'>
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">
                     {prevSelectedYear}
                   </span>
                 </div>
               </div>
 
+              {/* Sections Dropdown */}
+              {/* Sections Dropdown */}
+              {updateSelectedYear && sections[updateSelectedYear] && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-base-content">
+                    What Section?
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    value={updateSelectedSection}
+                    onChange={(e) => setUpdateSelectedSection(e.target.value)}
+                    disabled={!selectedDean}
+                  >
+                    <option disabled value="">
+                      ...
+                    </option>
+                    {sections[updateSelectedYear].map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="text-xs text-gray-500 italic">
+                    Previous:{" "}
+                    <span className="font-semibold text-gray-700">
+                      {prevSelectedSection}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {updateSelectedYear && (
-                <div className='space-y-2'>
+                <div className="space-y-2">
                   {/* Subject Selection */}
-                  <label className='block text-sm font-medium text-base-content'>
+                  <label className="block text-sm font-medium text-base-content">
                     Select Course Code
                   </label>
                   <select
-                    name='subject'
-                    className='select select-bordered w-full'
+                    name="subject"
+                    className="select select-bordered w-full"
                     value={updateSelectedSubject}
                     onChange={(e) => setUpdateSelectedSubject(e.target.value)}
                     disabled={!updateSelectedYear}
-                    required>
-                    <option
-                      className='text-dark-gray'
-                      disabled
-                      value=''>
+                    required
+                  >
+                    <option className="text-dark-gray" disabled value="">
                       ...
                     </option>
                     {subjectOptions.map((subj) => (
-                      <option
-                        key={subj}
-                        value={subj}>
+                      <option key={subj} value={subj}>
                         {subj}
                       </option>
                     ))}
                   </select>
 
-                  <div className='text-xs text-gray-500 italic'>
-                    Previous:{' '}
-                    <span className='font-semibold text-gray-700'>
+                  <div className="text-xs text-gray-500 italic">
+                    Previous:{" "}
+                    <span className="font-semibold text-gray-700">
                       {prevSelectedSubject}
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Section Selection */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
-                  What Section ?
-                </label>
-                <select
-                  name='building'
-                  className='select select-bordered w-full'
-                  value={updateSelectedSection}
-                  onChange={(e) => {
-                    setUpdateSelectedSection(e.target.value);
-                  }}>
-                  <option
-                    disabled
-                    value=''>
-                    ...
-                  </option>
-                  {sections.map((sec) => (
-                    <option
-                      key={sec}
-                      value={sec}>
-                      {sec}
-                    </option>
-                  ))}
-                </select>
-                <div className='text-xs text-gray-500 italic'>
-                  Previous:{' '}
-                  <span className='font-semibold text-gray-700'>
-                    {prevSelectedSection}
-                  </span>
-                </div>
-              </div>
-
               {/* Building Selection */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-base-content">
                   What Building ?
                 </label>
                 <select
-                  name='building'
-                  className='select select-bordered w-full'
+                  name="building"
+                  className="select select-bordered w-full"
                   value={updateSelectedBuilding}
                   onChange={(e) => {
                     setUpdateSelectedBuilding(e.target.value);
-                    setUpdateSelectedFloor('');
-                  }}>
-                  <option
-                    disabled
-                    value=''>
+                    setUpdateSelectedFloor("");
+                  }}
+                >
+                  <option disabled value="">
                     ...
                   </option>
                   {buildings.map((b) => (
-                    <option
-                      key={b}
-                      value={b}>
+                    <option key={b} value={b}>
                       {b}
                     </option>
                   ))}
                 </select>
                 {/* Previous Data Display */}
-                <div className='text-xs text-gray-500 italic'>
-                  Previous:{' '}
-                  <span className='font-semibold text-gray-700'>
+                <div className="text-xs text-gray-500 italic">
+                  Previous:{" "}
+                  <span className="font-semibold text-gray-700">
                     {prevSelectedBuilding}
                   </span>
                 </div>
               </div>
 
               {updateSelectedBuilding && (
-                <div className='space-y-2'>
+                <div className="space-y-2">
                   {/* Floor Selection */}
-                  <label className='block text-sm font-medium text-base-content'>
+                  <label className="block text-sm font-medium text-base-content">
                     What floor ?
                   </label>
                   <select
-                    name='floor'
-                    className='select select-bordered w-full'
+                    name="floor"
+                    className="select select-bordered w-full"
                     value={updateSelectedFloor}
                     onChange={(e) => {
                       setUpdateSelectedFloor(e.target.value);
-                      setUpdateSelectedRoom('');
-                      setUpdateStartTime('');
-                      setUpdateEndTime('');
+                      setUpdateSelectedRoom("");
+                      setUpdateStartTime("");
+                      setUpdateEndTime("");
                     }}
-                    required>
-                    <option
-                      disabled
-                      value=''>
+                    required
+                  >
+                    <option disabled value="">
                       ...
                     </option>
                     {floors.map((f) => {
-                      const floorNum = parseInt(f.replace(/\D/g, ''));
+                      const floorNum = parseInt(f.replace(/\D/g, ""));
                       return (
-                        <option
-                          key={f}
-                          value={floorNum}>
+                        <option key={f} value={floorNum}>
                           {floorNum}
                         </option>
                       );
                     })}
                   </select>
                   {/* Previous Data Display */}
-                  <div className='text-xs text-gray-500 italic'>
-                    Previous:{' '}
-                    <span className='font-semibold text-gray-700'>
+                  <div className="text-xs text-gray-500 italic">
+                    Previous:{" "}
+                    <span className="font-semibold text-gray-700">
                       {prevSelectedFloor}
                     </span>
                   </div>
 
                   {/* Room Selection */}
                   {rooms.length > 0 && (
-                    <div className='mb-6'>
-                      <label className='block text-sm font-medium text-base-content mb-2'>
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-base-content mb-2">
                         What Room ?
                       </label>
                       <select
-                        name='room'
-                        className='select select-bordered w-full'
+                        name="room"
+                        className="select select-bordered w-full"
                         value={updateSelectedRoom}
                         onChange={(e) => setUpdateSelectedRoom(e.target.value)}
-                        required>
-                        <option
-                          disabled
-                          value=''>
+                        required
+                      >
+                        <option disabled value="">
                           ...
                         </option>
                         {rooms.map((room) => (
-                          <option
-                            key={room}
-                            value={room}>
+                          <option key={room} value={room}>
                             {room}
                           </option>
                         ))}
                       </select>
-                      <div className='text-xs text-gray-500 italic mt-1'>
-                        Previous:{' '}
-                        <span className='font-semibold text-gray-700'>
+                      <div className="text-xs text-gray-500 italic mt-1">
+                        Previous:{" "}
+                        <span className="font-semibold text-gray-700">
                           {prevSelectedRoom}
                         </span>
                       </div>
@@ -461,203 +446,217 @@ const UpdateSchedule = ({
 
             {/* Time Selection */}
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-              {/* Start Time */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
-                  Class starts at:
-                </label>
-                <select
-                  className='select select-bordered w-full'
-                  value={updateStartTime}
-                  onChange={(e) => {
-                    const selectedStart = e.target.value;
-                    const selectedDateStr = new Date(
-                      selectedDate,
-                    ).toLocaleDateString('en-CA');
+            {updateSelectedRoom && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Start Time */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-base-content">
+                    Class starts at:
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    value={updateStartTime}
+                    onChange={(e) => {
+                      const selectedStart = e.target.value;
+                      const selectedDateStr = new Date(
+                        selectedDate
+                      ).toLocaleDateString("en-CA");
 
-                    // Filter entries for same room and date
-                    const sameDayEntries = occupiedTimes.filter((entry) => {
-                      const entryDateStr = new Date(
-                        entry.date,
-                      ).toLocaleDateString('en-CA');
-                      return entryDateStr === selectedDateStr;
-                    });
+                      // Filter entries for same room and date
+                      const sameDayEntries = occupiedTimes.filter((entry) => {
+                        const entryDateStr = new Date(
+                          entry.date
+                        ).toLocaleDateString("en-CA");
+                        return entryDateStr === selectedDateStr;
+                      });
 
-                    // Check if selectedStart is inside any occupied range (excluding exact end match)
-                    const isInsideOccupiedRange = sameDayEntries.some(
-                      (entry) =>
-                        selectedStart >= entry.timeStart &&
-                        selectedStart < entry.timeEnd &&
-                        selectedStart !== entry.timeEnd,
-                    );
-
-                    if (isInsideOccupiedRange) {
-                      toast.error(
-                        `${selectedStart} overlaps with an existing booking in Room ${prevSelectedRoom}.`,
+                      // Check if selectedStart is inside any occupied range (excluding exact end match)
+                      const isInsideOccupiedRange = sameDayEntries.some(
+                        (entry) =>
+                          selectedStart >= entry.timeStart &&
+                          selectedStart < entry.timeEnd &&
+                          selectedStart !== entry.timeEnd
                       );
-                      return;
-                    }
 
-                    // Find current booking ID (if editing an existing entry)
-                    const matchingEntry = sameDayEntries.find(
-                      (entry) =>
-                        entry.timeStart === updateStartTime &&
-                        entry.timeEnd === updateEndTime,
-                    );
-                    const selectedBookingId = matchingEntry?._id;
-
-                    // Check for duplicate start time (excluding current booking)
-                    const isStartTimeAlreadyTaken = sameDayEntries.some(
-                      (entry) =>
-                        entry.timeStart === selectedStart &&
-                        entry._id !== selectedBookingId,
-                    );
-
-                    if (isStartTimeAlreadyTaken) {
-                      toast.error(
-                        `${selectedStart} is already used by another booking in Room ${prevSelectedRoom}.`,
-                      );
-                      setUpdateStartTime('');
-                      return;
-                    }
-
-                    // All good — set the selected start time
-                    setUpdateStartTime(selectedStart);
-                  }}>
-                  <option
-                    disabled
-                    value=''>
-                    ...
-                  </option>
-                  {timeSlots.map((slot) => {
-                    const conflict = occupiedTimes.find(
-                      (entry) => entry.slot === slot,
-                    );
-                    const nextConflict = occupiedTimes.find(
-                      (entry) =>
-                        entry.timeStart === conflict?.timeEnd &&
-                        entry.room === updateSelectedRoom,
-                    );
-                    const isOccupied = !!conflict;
-
-                    const formattedTime = new Date(
-                      `1970-01-01T${slot}`,
-                    ).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    });
-                    let label = `${formattedTime}`;
-                    if (isOccupied) {
-                      label += ` ${
-                        conflict.professor?.fullName || 'Unknown'
-                      } • ${conflict.room} • ${conflict.building}`;
-                      if (nextConflict) {
-                        label += ` → Next: ${
-                          nextConflict.professor?.fullName || 'Unknown'
-                        } (${nextConflict.timeStart}–${nextConflict.timeEnd})`;
+                      if (isInsideOccupiedRange) {
+                        toast.error(
+                          `${selectedStart} overlaps with an existing booking in Room ${prevSelectedRoom}.`
+                        );
+                        return;
                       }
-                      label += '.';
-                    }
 
-                    return (
-                      <option
-                        key={slot}
-                        value={slot}
-                        className={`text-sm ${
-                          isOccupied
-                            ? 'bg-neutral text-neutral-content font-semibold'
-                            : 'text-base-content'
-                        }`}>
-                        {label}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+                      // Find current booking ID (if editing an existing entry)
+                      const matchingEntry = sameDayEntries.find(
+                        (entry) =>
+                          entry.timeStart === updateStartTime &&
+                          entry.timeEnd === updateEndTime
+                      );
+                      const selectedBookingId = matchingEntry?._id;
 
-              {/* End Time */}
-              <div className='space-y-2'>
-                <label className='block text-sm font-medium text-base-content'>
-                  Class ends at:
-                </label>
-                <select
-                  className='select select-bordered w-full'
-                  value={updateEndTime}
-                  onChange={(e) => setUpdateEndTime(e.target.value)}>
-                  <option
-                    disabled
-                    value=''>
-                    ...
-                  </option>
-                  {timeSlots.map((slot) => {
-                    const conflict = (occupiedTimes || []).find(
-                      (entry) => entry.slot === slot,
-                    );
-
-                    const nextConflict =
-                      conflict?.timeEnd &&
-                      (occupiedTimes || []).find(
-                        (entry) => entry.timeStart === conflict.timeEnd,
+                      // Check for duplicate start time (excluding current booking)
+                      const isStartTimeAlreadyTaken = sameDayEntries.some(
+                        (entry) =>
+                          entry.timeStart === selectedStart &&
+                          entry._id !== selectedBookingId
                       );
 
-                    const isOccupied = !!conflict;
-                    const isOwnedByCurrentProfessor =
-                      conflict?.professor === prevSelectedProff;
-                    const isOccupiedByOther =
-                      isOccupied && !isOwnedByCurrentProfessor;
-
-                    const formattedTime = new Date(
-                      `1970-01-01T${slot}`,
-                    ).toLocaleTimeString('en-US', {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    });
-                    let label = `${formattedTime}`;
-                    if (isOccupied) {
-                      label += ` — Instructor: ${conflict.professor?.fullName} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
-                      if (nextConflict) {
-                        label += ` — then ${nextConflict.professor} from ${nextConflict.timeStart} to ${nextConflict.timeEnd}`;
+                      if (isStartTimeAlreadyTaken) {
+                        toast.error(
+                          `${selectedStart} is already used by another booking in Room ${prevSelectedRoom}.`
+                        );
+                        setUpdateStartTime("");
+                        return;
                       }
-                      label += '.';
-                    }
 
-                    const isSameAsStart = slot === updateStartTime;
+                      // All good — set the selected start time
+                      setUpdateStartTime(selectedStart);
+                    }}
+                  >
+                    <option disabled value="">
+                      ...
+                    </option>
+                    {timeSlots.map((slot) => {
+                      const conflict = occupiedTimes.find(
+                        (entry) =>
+                          entry.slot === slot &&
+                          entry.room === updateSelectedRoom &&
+                          new Date(entry.date).toLocaleDateString("en-CA") ===
+                            selectedDate.toLocaleDateString("en-CA")
+                      );
+                      const nextConflict = occupiedTimes.find(
+                        (entry) =>
+                          entry.timeStart === conflict?.timeEnd &&
+                          entry.room === updateSelectedRoom
+                      );
+                      const isOccupied = !!conflict;
 
-                    return (
-                      <option
-                        key={slot}
-                        value={slot}
-                        disabled={isOccupiedByOther || isSameAsStart}
-                        className={`text-sm ${
-                          isOwnedByCurrentProfessor || isSameAsStart
-                            ? 'bg-green-500 text-white font-semibold'
-                            : isOccupiedByOther
-                            ? 'bg-neutral text-neutral-content font-semibold'
-                            : 'text-base-content'
-                        }`}>
-                        {label}
-                      </option>
-                    );
-                  })}
-                </select>
+                      const formattedTime = new Date(
+                        `1970-01-01T${slot}`
+                      ).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      });
+                      let label = `${formattedTime}`;
+                      if (isOccupied) {
+                        label += ` ${
+                          conflict.professor?.fullName || "Unknown"
+                        } • ${conflict.room} • ${conflict.building}`;
+                        if (nextConflict) {
+                          label += ` → Next: ${
+                            nextConflict.professor?.fullName || "Unknown"
+                          } (${nextConflict.timeStart}–${
+                            nextConflict.timeEnd
+                          })`;
+                        }
+                        label += ".";
+                      }
+
+                      return (
+                        <option
+                          key={slot}
+                          value={slot}
+                          className={`text-sm ${
+                            isOccupied
+                              ? "bg-neutral text-neutral-content font-semibold"
+                              : "text-base-content"
+                          }`}
+                        >
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* End Time */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-base-content">
+                    Class ends at:
+                  </label>
+                  <select
+                    className="select select-bordered w-full"
+                    value={updateEndTime}
+                    onChange={(e) => setUpdateEndTime(e.target.value)}
+                  >
+                    <option disabled value="">
+                      ...
+                    </option>
+                    {timeSlots.map((slot) => {
+                      const conflict = occupiedTimes.find(
+                        (entry) =>
+                          entry.slot === slot &&
+                          entry.room === updateSelectedRoom &&
+                          new Date(entry.date).toLocaleDateString("en-CA") ===
+                            selectedDate.toLocaleDateString("en-CA")
+                      );
+
+                      const nextConflict =
+                        conflict?.timeEnd &&
+                        (occupiedTimes || []).find(
+                          (entry) => entry.timeStart === conflict.timeEnd
+                        );
+
+                      const isOccupied = !!conflict;
+                      const isOwnedByCurrentProfessor =
+                        conflict?.professor === prevSelectedProff;
+                      const isOccupiedByOther =
+                        isOccupied && !isOwnedByCurrentProfessor;
+
+                      const formattedTime = new Date(
+                        `1970-01-01T${slot}`
+                      ).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      });
+                      let label = `${formattedTime}`;
+                      if (isOccupied) {
+                        label += ` — Instructor: ${conflict.professor?.fullName} in Room ${conflict.room}, Floor ${conflict.floor}, ${conflict.building}`;
+                        if (nextConflict) {
+                          label += ` — then ${nextConflict.professor} from ${nextConflict.timeStart} to ${nextConflict.timeEnd}`;
+                        }
+                        label += ".";
+                      }
+
+                      const isSameAsStart = slot === updateStartTime;
+
+                      return (
+                        <option
+                          key={slot}
+                          value={slot}
+                          disabled={isOccupiedByOther || isSameAsStart}
+                          className={`text-sm ${
+                            isOwnedByCurrentProfessor || isSameAsStart
+                              ? "bg-green-500 text-white font-semibold"
+                              : isOccupiedByOther
+                              ? "bg-neutral text-neutral-content font-semibold"
+                              : "text-base-content"
+                          }`}
+                        >
+                          {label}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className='modal-action'>
+            <div className="modal-action">
               <button
-                type='button'
-                className='btn btn-outline'
-                onClick={handleCancelUpdate}>
+                type="button"
+                className="btn btn-outline"
+                onClick={handleCancelUpdate}
+              >
                 Cancel
               </button>
               <button
-                type='submit'
-                className='btn btn-primary'
-                disabled={isSubmitting}>
-                {isSubmitting ? 'Updating...' : 'Confirm Update'}
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Confirm Update"}
               </button>
             </div>
           </form>
