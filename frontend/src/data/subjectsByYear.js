@@ -1,15 +1,8 @@
 // Data/subjects.js
 
 const subjectsByYear = {
-  "1st Year": [
-    "XFAR1",
-    "READPHILHIS",
-    "XOBLICO",
-    "ENVISCI",
-    "YMANSCI",
-    "XMANECO",
-  ],
-  "2nd Year": [
+  1: ["XFAR1", "READPHILHIS", "XOBLICO", "ENVISCI", "YMANSCI", "XMANECO"],
+  2: [
     "GENDSOC",
     "ARTAPP",
     "XCOSTAC",
@@ -20,7 +13,7 @@ const subjectsByYear = {
     "XTAX1",
     "STS",
   ],
-  "3rd Year": [
+  3: [
     "ETHICS",
     "LIVITERA",
     "XACCRES1",
@@ -30,7 +23,7 @@ const subjectsByYear = {
     "XFINMAR",
     "XINTAC3",
   ],
-  "4th Year": [
+  4: [
     "XPROELEC4",
     "XPROELEC3",
     "XAACA2",

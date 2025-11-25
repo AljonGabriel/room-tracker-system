@@ -185,6 +185,9 @@ const AssigningRoom = () => {
 
   const colors = colorPalette;
 
+  console.log(sections);
+  console.log(selectedYear);
+
   // Assign a consistent color to each unique name using a cache
   const getColorClass = (() => {
     const cache = {};
@@ -351,26 +354,46 @@ const AssigningRoom = () => {
 
         {/* Year Dropdown */}
         <div className="flex items-center gap-4">
-          <label className="font-medium w-32">What year level ?</label>
-
+          <label className="font-medium w-32">What year level?</label>
           <select
             className="select select-bordered flex-1"
             value={selectedYear}
             onChange={(e) => {
-              setSelectedYear(e.target.value);
-              setSelectedSubject(""); // reset subject
+              setSelectedYear(e.target.value); // always a string
+              setSelectedSection(""); // reset section
             }}
           >
             <option disabled value="">
               ...
             </option>
-            {Object.keys(subjectsByYear).map((year) => (
+            {Object.keys(sections).map((year) => (
               <option key={year} value={year}>
-                {year}
+                {year} Year
               </option>
             ))}
           </select>
         </div>
+
+        {/* Sections Dropdown */}
+        {selectedYear && sections[selectedYear] && (
+          <div className="flex items-center gap-4">
+            <label className="font-medium w-32">What Section?</label>
+            <select
+              className="select select-bordered flex-1"
+              value={selectedSection}
+              onChange={(e) => setSelectedSection(e.target.value)}
+            >
+              <option disabled value="">
+                ...
+              </option>
+              {sections[selectedYear].map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Subject Dropdown */}
         <div className="flex items-center gap-4">
@@ -387,25 +410,6 @@ const AssigningRoom = () => {
             {subjectOptions.map((subj) => (
               <option key={subj} value={subj}>
                 {subj}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Sections Dropdown */}
-        <div className="flex items-center gap-4">
-          <label className="font-medium w-32">What Section ?</label>
-          <select
-            className="select select-bordered flex-1"
-            value={selectedSection}
-            onChange={(e) => setSelectedSection(e.target.value)}
-          >
-            <option disabled value="">
-              ...
-            </option>
-            {sections.map((sec) => (
-              <option key={sec} value={sec}>
-                {sec}
               </option>
             ))}
           </select>
