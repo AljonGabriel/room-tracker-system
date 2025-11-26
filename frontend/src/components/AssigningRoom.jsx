@@ -26,8 +26,10 @@ const AssigningRoom = () => {
   // Form state
 
   const [selectedDean, setSelectedDean] = useState(() => {
-    return localStorage.getItem("loggedInDean") || "";
+    const storedDean = localStorage.getItem("loggedInDean");
+    return storedDean ? JSON.parse(storedDean) : null;
   });
+
   const [selectedProfessor, setSelectedProfessor] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -41,6 +43,8 @@ const AssigningRoom = () => {
 
   //conditional
   const [isRepeating, setIsRepeating] = useState("No");
+
+  console.log("Dean:", selectedDean);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -327,7 +331,7 @@ const AssigningRoom = () => {
             value={selectedDean}
             disabled
           >
-            <option value={selectedDean}>{selectedDean}</option>
+            <option value={selectedDean?._id}>{selectedDean?.fullName}</option>
           </select>
         </div>
 
@@ -712,7 +716,7 @@ const AssigningRoom = () => {
           endTime &&
           selectedDate && (
             <div className="text-center text-success mt-4">
-              ✅ Assigned by <strong>{selectedDean}</strong> to{" "}
+              ✅ Assigned by <strong>{selectedDean?.fullName}</strong> to{" "}
               <strong>{selectedProfessor}</strong>
               <br />
               Room <strong>{selectedRoom}</strong> in{" "}

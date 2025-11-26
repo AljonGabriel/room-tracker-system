@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import employeeHooks from "../middleware/employeeHooks.js";
 
 const employeeSchema = new mongoose.Schema(
   {
@@ -25,6 +26,9 @@ const employeeSchema = new mongoose.Schema(
     timestamps: true, // Adds createdAt and updatedAt fields
   }
 );
+
+// Apply middleware
+employeeHooks(employeeSchema);
 
 const Employee = mongoose.model("Employees", employeeSchema);
 

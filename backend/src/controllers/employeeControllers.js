@@ -1,5 +1,5 @@
 import Employee from "../models/Employee.js";
-
+import Room from "../models/Room.js";
 export const getEmp = async (req, res) => {
   try {
     const employees = await Employee.find(); // Fetch all records
@@ -74,14 +74,18 @@ export const delEmp = async (req, res) => {
   }
 
   try {
+    // Delete the employee
     const deleted = await Employee.findByIdAndDelete(id);
 
     if (!deleted) {
       return res.status(404).json({ message: "Employee not found" });
     }
 
+    // Cascade delete: remove all rooms assigned by this employee
+    await Room.deleteMany({ assignedBy: id });
+
     return res.status(200).json({
-      message: "✅ Employee deleted successfully.",
+      message: "✅ Employee and their assigned rooms deleted successfully.",
       data: deleted,
     });
   } catch (error) {

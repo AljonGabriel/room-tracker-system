@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 // 1 - create a schema
 // 2 - model based of that schema
@@ -43,11 +43,12 @@ const roomSchema = new mongoose.Schema(
     },
     professor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Employees', // or whatever your model name is
+      ref: "Employees", // or whatever your model name is
       required: true,
     },
     assignedBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employees",
       required: true,
     },
     repeating: {
@@ -57,9 +58,9 @@ const roomSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
-  },
+  }
 );
 
-const Room = mongoose.model('Room', roomSchema);
+const Room = mongoose.model("Room", roomSchema);
 
 export default Room;
