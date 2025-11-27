@@ -120,7 +120,7 @@ const AssigningRoom = () => {
 
         const instructors = allEmployees
           .filter((emp) => emp.role === "Instructor")
-          .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
+          .map((emp) => ({ _id: emp._id, fullName: emp.fullName }));
 
         setInstructorList(instructors); // ✅ Add this state if needed
       } catch (error) {
@@ -334,7 +334,7 @@ const AssigningRoom = () => {
             <option value={selectedDean?._id}>{selectedDean?.fullName}</option>
           </select>
         </div>
-
+        {/* professor Dropdown */}
         <div className="flex items-center gap-4">
           <label className="font-medium w-32">Who will teach ?</label>
           <select
@@ -346,7 +346,7 @@ const AssigningRoom = () => {
               ...
             </option>
             {instructorList.map((prof) => (
-              <option key={prof.id} value={prof.id}>
+              <option key={prof._id} value={prof._id}>
                 {prof.fullName}
               </option>
             ))}

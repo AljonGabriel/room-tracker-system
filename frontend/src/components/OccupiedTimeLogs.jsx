@@ -1,9 +1,9 @@
-import buildingData from '../data/buildingData';
-import UpdateSchedule from './UpdateSchedule';
-import DelSchedule from './DelSchedule';
-import ModalWrapper from './modals/ModalWrapper';
-import { useState } from 'react';
-import OccupiedRoomsList from './OccupiedRoomsList';
+import buildingData from "../data/buildingData";
+import UpdateSchedule from "./UpdateSchedule";
+import DelSchedule from "./DelSchedule";
+import ModalWrapper from "./modals/ModalWrapper";
+import { useState } from "react";
+import OccupiedRoomsList from "./OccupiedRoomsList";
 
 const OccupiedTimeLogs = ({
   groupedByProfessor,
@@ -18,46 +18,46 @@ const OccupiedTimeLogs = ({
   onSetOccupiedTimes,
   onResetForm,
 }) => {
-  const loggedInDean = localStorage.getItem('loggedInDean');
+  const loggedInDean = localStorage.getItem("loggedInDean");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div>
-      <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4 my-4'>
-        <h4 className='font-semibold text-lg text-base-content'>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 my-4">
+        <h4 className="font-semibold text-lg text-base-content">
           📌 Scheduled Rooms logs
         </h4>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className='btn btn-secondary btn-outline'>
+          className="btn btn-secondary btn-outline"
+        >
           View All
         </button>
         <ModalWrapper
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}>
+          onClose={() => setIsModalOpen(false)}
+        >
           <OccupiedRoomsList />
         </ModalWrapper>
       </div>
 
       {/* Legend */}
-      <div className='mb-4 flex flex-wrap gap-4 items-center'>
+      <div className="mb-4 flex flex-wrap gap-4 items-center">
         {Array.from(
           new Map(
             uniqueProfessors
               .filter((prof) => prof && prof.fullName)
-              .map((prof) => [prof.fullName, prof]),
-          ).values(),
+              .map((prof) => [prof.fullName, prof])
+          ).values()
         ).map((prof) => {
           const { bg } = getColorClass(prof.fullName);
           return (
-            <div
-              key={prof._id}
-              className='flex items-center gap-2'>
+            <div key={prof._id} className="flex items-center gap-2">
               <div className={`w-4 h-4 rounded ${bg}`}></div>
-              <span className='text-sm font-medium text-base-content'>
-                {prof.fullName || 'Unknown'}
+              <span className="text-sm font-medium text-base-content">
+                {prof.fullName || "Unknown"}
               </span>
             </div>
           );
@@ -65,12 +65,12 @@ const OccupiedTimeLogs = ({
       </div>
 
       {/* Grouped Slot Display */}
-      <div className='mt-4 max-h-55 overflow-y-auto space-y-1'>
+      <div className="mt-4 max-h-55 overflow-y-auto space-y-1">
         {Object.entries(groupedByProfessor).map(([profId, group]) => {
           const professor = group?.professor;
           const slots = Array.isArray(group?.slots) ? group.slots : [];
 
-          const name = professor?.fullName || 'Unknown';
+          const name = professor?.fullName || "Unknown";
           const { border } = getColorClass(name);
 
           const uniqueSlots = slots
@@ -80,7 +80,7 @@ const OccupiedTimeLogs = ({
                   (s) =>
                     s.timeStart === slot.timeStart &&
                     s.timeEnd === slot.timeEnd &&
-                    s.professor?._id === slot.professor?._id,
+                    s.professor?._id === slot.professor?._id
                 ) === index
               );
             })
@@ -93,37 +93,39 @@ const OccupiedTimeLogs = ({
           return (
             <div
               key={profId}
-              className={`border-2 rounded p-4 bg-neutral text-neutral-content ${border}`}>
-              <div className='mb-2 text-md font-bold'>{name}</div>
+              className={`border-2 rounded p-4 bg-neutral text-neutral-content ${border}`}
+            >
+              <div className="mb-2 text-md font-bold">{name}</div>
 
-              <div className='space-y-2'>
+              <div className="space-y-2">
                 {uniqueSlots.map((slot, index) => (
                   <div
                     key={slot._id || index}
-                    className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
-                    <div className='text-sm text-base-content space-y-1'>
+                    className="bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center"
+                  >
+                    <div className="text-sm text-base-content space-y-1">
                       <div>
                         🕒 <strong>{slot.timeStart}</strong>–
-                        <strong>{slot.timeEnd}</strong> on{' '}
-                        {new Date(slot.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
+                        <strong>{slot.timeEnd}</strong> on{" "}
+                        {new Date(slot.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
                         })}
                       </div>
                       <div>
-                        🏫 <strong>{slot.building}</strong>, Floor{' '}
-                        <strong>{slot.floor}</strong>, Room{' '}
+                        🏫 <strong>{slot.building}</strong>, Floor{" "}
+                        <strong>{slot.floor}</strong>, Room{" "}
                         <strong>{slot.room}</strong>
                       </div>
                       <div>
-                        🎓 <strong>{slot.year}</strong> | 📘{' '}
-                        <strong>{slot.subject}</strong> | 🧑‍🏫{' '}
+                        🎓 <strong>{slot.year}</strong> | 📘{" "}
+                        <strong>{slot.subject}</strong> | 🧑‍🏫{" "}
                         <strong>{slot.section}</strong>
                       </div>
                     </div>
                     {loggedInDean === slot.assignedBy ? (
-                      <div className='flex gap-2'>
+                      <div className="flex gap-2">
                         <UpdateSchedule
                           prevSelectedFloor={slot.floor}
                           room={slot.room}
@@ -135,7 +137,7 @@ const OccupiedTimeLogs = ({
                           prevSelectedRoom={slot.room}
                           buildingData={buildingData}
                           prevSelectedProff={
-                            slot.professor?.fullName || 'Unknown'
+                            slot.professor?.fullName || "Unknown"
                           }
                           selectedDean={selectedDean}
                           scheduledID={slot._id}
@@ -157,7 +159,8 @@ const OccupiedTimeLogs = ({
                       </div>
                     ) : (
                       <span>
-                        Assigned by: <strong>{slot.assignedBy}</strong>
+                        Assigned by:{" "}
+                        <strong>{slot.assignedBy?.fullName}</strong>
                       </span>
                     )}
                   </div>
