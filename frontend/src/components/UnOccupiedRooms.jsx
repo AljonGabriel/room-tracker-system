@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import buildingLayouts from "../data/buildingData.js";
 
-const UnOccupiedRooms = () => {
+const UnOccupiedRooms = ({ selectedDate, classStart, classEnd }) => {
   const [occupiedRooms, setOccupiedRooms] = useState([]);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [buildingFilter, setBuildingFilter] = useState("All");
@@ -30,21 +30,43 @@ const UnOccupiedRooms = () => {
     return allRooms;
   };
 
+  // Convert "HH:mm" to minutes
+  const toMinutes = (timeStr) => {
+    const [h, m] = timeStr.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  // Check overlap
+  const isOverlap = (startA, endA, startB, endB) => {
+    return startA < endB && endA > startB;
+  };
+
   useEffect(() => {
     const getOccupiedRooms = async () => {
       try {
         const res = await axios.get(`${API_BASE}/api/rooms/assignments`);
-        const occupied = res.data; // [{ room: "R202 - Computer Lab 7", building:"...", floor:2 }, ...]
-
+        const occupied = res.data;
         setOccupiedRooms(occupied);
 
-        // Step 1: Get all rooms
         const allRooms = getAllRooms();
+        const start = toMinutes(classStart);
+        const end = toMinutes(classEnd);
 
-        // Step 2: Filter out occupied ones (exact match with DB room field)
-        const unoccupied = allRooms.filter(
-          (room) => !occupied.some((occ) => occ.room === room.name)
-        );
+        // Filter available rooms for selected date/time
+        const unoccupied = allRooms.filter((room) => {
+          const roomAssignments = occupied.filter(
+            (a) =>
+              a.room === room.name &&
+              new Date(a.date).toDateString() ===
+                new Date(selectedDate).toDateString()
+          );
+
+          const conflict = roomAssignments.some((a) =>
+            isOverlap(start, end, toMinutes(a.timeStart), toMinutes(a.timeEnd))
+          );
+
+          return !conflict; // keep only available
+        });
 
         setAvailableRooms(unoccupied);
       } catch (error) {
@@ -52,10 +74,12 @@ const UnOccupiedRooms = () => {
       }
     };
 
-    getOccupiedRooms();
-  }, []);
+    if (selectedDate && classStart && classEnd) {
+      getOccupiedRooms();
+    }
+  }, [selectedDate, classStart, classEnd]);
 
-  // Filter by building and floor
+  // Apply building + floor filters
   const filteredRooms = availableRooms.filter((room) => {
     const buildingMatch =
       buildingFilter === "All" || room.building === buildingFilter;
@@ -72,6 +96,9 @@ const UnOccupiedRooms = () => {
 
   return (
     <div className="space-y-4 text-sm">
+      <p className="text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded px-3 py-2">
+        Available rooms based on your selected date and time
+      </p>
       <h2 className="text-base font-semibold">Available Rooms</h2>
 
       {/* Building Filter */}
@@ -129,7 +156,7 @@ const UnOccupiedRooms = () => {
           ))
         ) : (
           <p className="text-xs text-base-content opacity-60">
-            No available rooms
+            No available rooms for this time slot
           </p>
         )}
       </div>

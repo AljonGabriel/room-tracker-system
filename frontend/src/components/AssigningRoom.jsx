@@ -285,7 +285,11 @@ const AssigningRoom = () => {
   return (
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start gap-3 mt-5">
       <div className="w-full max-w-xs mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-4">
-        <UnOccupiedRooms />
+        <UnOccupiedRooms
+          classStart={startTime}
+          classEnd={endTime}
+          selectedDate={selectedDate}
+        />
       </div>
       <div className="w-full max-w-m mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-4">
         <h2 className="text-xl font-bold text-center">📝 Assign a Room</h2>

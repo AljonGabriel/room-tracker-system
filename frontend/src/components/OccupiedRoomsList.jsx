@@ -254,7 +254,7 @@ const OccupiedRoomsList = () => {
                           <strong>{slot.section}</strong>
                         </div>
                       </div>
-                      {dean?.fullName === slot.assignedBy?.fullName ? (
+                      {dean?._id === slot.assignedBy?._id ? (
                         <div className="flex gap-2 mt-3">
                           <UpdateSchedule
                             prevSelectedFloor={slot.floor}
