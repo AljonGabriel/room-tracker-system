@@ -268,18 +268,40 @@ const FilteredReports = () => {
           )}
 
           {selectedFilter === "Section" && (
-            <select
-              className="select select-bordered w-full max-w-xs"
-              value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Section</option>
-              {sections.map((section) => (
-                <option key={section} value={section}>
-                  {section}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-4">
+              {/* Year Level Dropdown */}
+              <select
+                className="select select-bordered w-full max-w-xs"
+                value={selectedYear}
+                onChange={(e) => {
+                  setSelectedYear(e.target.value);
+                  setSelectedValue(""); // reset section when year changes
+                }}
+              >
+                <option value="">Select Year Level</option>
+                {Object.keys(sections).map((year) => (
+                  <option key={year} value={year}>
+                    Year {year}
+                  </option>
+                ))}
+              </select>
+
+              {/* Section Dropdown (filtered by year) */}
+              {selectedYear && (
+                <select
+                  className="select select-bordered w-full max-w-xs"
+                  value={selectedValue}
+                  onChange={(e) => setSelectedValue(e.target.value)}
+                >
+                  <option value="">Select Section</option>
+                  {sections[selectedYear].map((section) => (
+                    <option key={section} value={section}>
+                      {section}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
           )}
         </div>
 

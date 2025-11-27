@@ -8,6 +8,8 @@ import toast from "react-hot-toast";
 import OccupiedTimeLogs from "./OccupiedTimeLogs.jsx";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import UnOccupiedRooms from "./UnOccupiedRooms.jsx";
+import BuildingReference from "./BuildingReference.jsx";
 
 const AssigningRoom = () => {
   const isLocal = window.location.hostname === "localhost";
@@ -281,46 +283,46 @@ const AssigningRoom = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 mt-5">
-      <div className="flex-1 p-6 bg-base-200 rounded-lg shadow-md space-y-6">
+    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start gap-3 mt-5">
+      <div className="w-full max-w-xs mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-4">
+        <UnOccupiedRooms />
+      </div>
+      <div className="w-full max-w-m mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-4">
         <h2 className="text-xl font-bold text-center">📝 Assign a Room</h2>
 
+        {/* Action Button */}
+        <div className="flex gap-2">
+          <button
+            className="btn btn-sm btn-outline btn-warning flex-1"
+            onClick={() => {
+              localStorage.removeItem("selectedDate");
+              toast.success("Please choose a new date.");
+              setTimeout(() => navigate("/home"), 200);
+            }}
+          >
+            Change Date
+          </button>
+
+          <button
+            className="btn btn-sm btn-outline btn-accent flex-1"
+            onClick={() => navigate("/employees")}
+          >
+            Manage Employee
+          </button>
+        </div>
+
         {/* Selected Date Display */}
+
         <div className="flex items-center gap-4">
           <label className="font-medium w-32">Selected Date:</label>
           {selectedDate && (
             <input
               type="text"
-              className="input input-bordered flex-1 bg-base-300 text-center font-semibold"
+              className="input input-bordered flex-1 bg-base-300 text-center font-semibold w-auto"
               value={selectedDate.toDateString()}
               readOnly
             />
           )}
-          <button
-            className="btn btn-warning btn-outline btn-info whitespace-nowrap"
-            onClick={() => {
-              localStorage.removeItem("selectedDate");
-              toast.success("Please choose a new date.");
-
-              // Delay navigation slightly to allow toast to render
-              setTimeout(() => {
-                navigate("/home");
-              }, 200); // 500ms is usually enough
-            }}
-          >
-            Change Date
-          </button>
-          {/* Action Button */}
-          <div className="flex">
-            <button
-              className="btn btn-outline btn-accent"
-              onClick={() => {
-                navigate("/employees");
-              }}
-            >
-              Manage Employee
-            </button>
-          </div>
         </div>
 
         {/* Dean Dropdown */}
@@ -744,38 +746,13 @@ const AssigningRoom = () => {
             </div>
           )}
       </div>
-      <div className="flex-1 p-6 bg-base-200 rounded-lg shadow-md space-y-4">
-        <div className="space-y-4">
-          {/* Header */}
-          <div>
-            <h2 className="text-xl font-semibold text-base-content">
-              Building Reference
-            </h2>
-          </div>
-          <div className="flex items-center justify-between">
-            <h3>
-              {selectedBuilding} – {selectedFloor}
-            </h3>
-            <span className="badge badge-outline badge-sm text-xs">
-              {rooms.length} rooms
-            </span>
-          </div>
-
-          {/* Image Frame with Fixed Size */}
-          <div className="w-full h-[500px] border border-base-300 rounded-lg overflow-hidden shadow-sm bg-base-100 flex items-center justify-center">
-            {floorData?.image ? (
-              <img
-                src={floorData.image}
-                alt={`${selectedBuilding} ${selectedFloor}F Floor Plan`}
-                className="max-h-full max-w-full object-contain"
-              />
-            ) : (
-              <div className="text-sm text-base-content opacity-60">
-                No floor plan available
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="w-full max-w-m mx-auto p-6 bg-base-200 rounded-lg shadow-md space-y-4">
+        <BuildingReference
+          onSelectedBuilding={selectedBuilding}
+          onSelectedFloor={selectedFloor}
+          floorData={floorData}
+          rooms={rooms}
+        />
       </div>
     </div>
   );
