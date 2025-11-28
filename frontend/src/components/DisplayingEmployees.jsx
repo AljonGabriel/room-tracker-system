@@ -19,7 +19,9 @@ const DisplayingEmployees = () => {
   const [employees, setEmployees] = useState([]);
 
   const [loading, setLoading] = useState(true);
-  const deans = (employees || []).filter((emp) => emp?.role === 'Dean');
+  const deans = (employees || []).filter(
+    (emp) => emp?.role === 'Dean' || emp?.role === 'SuperAdmin',
+  );
   const instructors = (employees || []).filter(
     (emp) => emp?.role === 'Instructor',
   );
@@ -43,6 +45,7 @@ const DisplayingEmployees = () => {
   }, []);
 
   console.log('Employees:', employees);
+  console.log('loggedInDean:', loggedInDean?.fullName);
 
   return (
     <div className='min-h-screen bg-base-200 py-10'>
@@ -75,21 +78,30 @@ const DisplayingEmployees = () => {
                       {new Date(emp.hiringDate).toLocaleDateString('en-US')}
                     </b>
                   </td>
-                  <td>
-                    <div className='flex gap-2'>
-                      <UpdateEmp
-                        empID={emp._id}
-                        empName={emp.fullName}
-                        empRole={emp.role}
-                        setEmployees={setEmployees}
-                      />
-                      <DeleteEmployee
-                        empID={emp._id}
-                        empName={emp.fullName}
-                        setEmployees={setEmployees}
-                      />
-                    </div>
-                  </td>
+                  {loggedInDean?.role === 'SuperAdmin' ? (
+                    <td>
+                      <div className='flex gap-2'>
+                        <UpdateEmp
+                          empID={emp._id}
+                          empName={emp.fullName}
+                          empRole={emp.role}
+                          setEmployees={setEmployees}
+                        />
+                        <DeleteEmployee
+                          empID={emp._id}
+                          empName={emp.fullName}
+                          setEmployees={setEmployees}
+                        />
+                      </div>
+                    </td>
+                  ) : (
+                    <td>
+                      {' '}
+                      <span className='text-sm italic text-gray-500'>
+                        Not authorized
+                      </span>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -122,8 +134,9 @@ const DisplayingEmployees = () => {
                       {new Date(emp.hiringDate).toLocaleDateString('en-US')}
                     </b>
                   </td>
-                  <td>{emp.reportsTo}</td>
-                  {loggedInDean?.fullName === emp.reportsTo ? (
+                  <td>{emp?.reportsTo?.fullName}</td>
+                  {loggedInDean?.role === 'SuperAdmin' ||
+                  loggedInDean?._id === emp.reportsTo?._id ? (
                     <td>
                       <div className='flex gap-2'>
                         <UpdateEmp

@@ -20,7 +20,7 @@ const AddEmployee = ({ setEmployees }) => {
   const [pwd, setPwd] = useState('');
 
   const [hiringDate, setHiringDate] = useState('');
-  const [reportsTo, setReportsTo] = useState(dean?.fullName);
+  const [reportsTo, setReportsTo] = useState(dean?._id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +92,6 @@ const AddEmployee = ({ setEmployees }) => {
                 required
               />
             </div>
-
             {/* Role Dropdown */}
             <div>
               <label className='label font-medium'>Role</label>
@@ -101,12 +100,17 @@ const AddEmployee = ({ setEmployees }) => {
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required>
-                <option value=''>Select Role</option>
-                <option value='Instructor'>Instructor</option>
-                <option value='Dean'>Dean</option>
+                {dean?.role === 'SuperAdmin' ? (
+                  <>
+                    <option value=''>Select Role</option>
+                    <option value='Instructor'>Instructor</option>
+                    <option value='Dean'>Dean</option>
+                  </>
+                ) : (
+                  <option value='Instructor'>Instructor</option>
+                )}
               </select>
             </div>
-
             {role === 'Dean' && (
               <>
                 <div>
@@ -133,7 +137,6 @@ const AddEmployee = ({ setEmployees }) => {
                 </div>
               </>
             )}
-
             {role === 'Instructor' && (
               <>
                 <div>
@@ -161,7 +164,6 @@ const AddEmployee = ({ setEmployees }) => {
                 required
               />
             </div>
-
             {/* Modal Actions */}
             <div className='modal-action'>
               <label

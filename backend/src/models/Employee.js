@@ -22,7 +22,9 @@ const employeeSchema = new mongoose.Schema(
       required: true,
     },
     reportsTo: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Employees',
+      required: true,
     },
   },
   {

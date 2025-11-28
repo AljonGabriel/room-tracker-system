@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import colorPalette from "../data/colorPalette.js";
-import UpdateSchedule from "./UpdateSchedule.jsx";
-import DelSchedule from "./DelSchedule.jsx";
-import buildingData from "../data/buildingData.js";
-import subjectsByYear from "../data/subjectsByYear.js";
-import sections from "../data/sections.js";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import colorPalette from '../data/colorPalette.js';
+import UpdateSchedule from './UpdateSchedule.jsx';
+import DelSchedule from './DelSchedule.jsx';
+import buildingData from '../data/buildingData.js';
+import subjectsByYear from '../data/subjectsByYear.js';
+import sections from '../data/sections.js';
 
 const OccupiedRoomsList = () => {
-  const storedDean = localStorage.getItem("loggedInDean");
+  const storedDean = localStorage.getItem('loggedInDean');
   const dean = storedDean ? JSON.parse(storedDean) : null;
 
-  const isLocal = window.location.hostname === "localhost";
+  const isLocal = window.location.hostname === 'localhost';
 
   const API_BASE = isLocal
-    ? "http://localhost:5001" // 👈 your local backend
+    ? 'http://localhost:5001' // 👈 your local backend
     : import.meta.env.VITE_API_BASE; // 👈 your Render backend
 
   const [occupiedRooms, setOccupiedRooms] = useState([]);
@@ -53,13 +53,13 @@ const OccupiedRoomsList = () => {
               subject,
               section,
               assignedBy,
-            }))
+            })),
         );
 
         setOccupiedRooms(expanded);
-        console.log("Fetched Occupied Rooms:", expanded);
+        console.log('Fetched Occupied Rooms:', expanded);
       } catch (error) {
-        console.error("Error fetching occupied rooms:", error);
+        console.error('Error fetching occupied rooms:', error);
       }
     };
 
@@ -90,7 +90,7 @@ const OccupiedRoomsList = () => {
     return acc;
   }, {});
 
-  console.log("Grouped by Professor:", groupedByProfessor);
+  console.log('Grouped by Professor:', groupedByProfessor);
 
   const colors = colorPalette;
 
@@ -111,7 +111,7 @@ const OccupiedRoomsList = () => {
   const generateTimeSlots = () => {
     const slots = [];
     for (let h = 0; h < 24; h++) {
-      const hour = h.toString().padStart(2, "0");
+      const hour = h.toString().padStart(2, '0');
       slots.push(`${hour}:00`);
     }
     return slots;
@@ -120,27 +120,29 @@ const OccupiedRoomsList = () => {
   const timeSlots = generateTimeSlots();
 
   const uniqueProfessors = Array.from(
-    new Set(occupiedRooms.map((entry) => entry.professor))
+    new Set(occupiedRooms.map((entry) => entry.professor)),
   );
 
-  console.log("Occupied Rooms Data:", occupiedRooms);
+  console.log('Occupied Rooms Data:', occupiedRooms);
   return (
-    <div className="max-w-3xl mx-auto space-y-2 mt-10">
+    <div className='max-w-3xl mx-auto space-y-2 mt-10'>
       {/* 🧭 Legend: Unique Professors */}
-      <div className="mb-4 flex flex-wrap gap-4 items-center">
+      <div className='mb-4 flex flex-wrap gap-4 items-center'>
         {Array.from(
           new Map(
             uniqueProfessors
               .filter((prof) => prof && prof.fullName)
-              .map((prof) => [prof.fullName, prof])
-          ).values()
+              .map((prof) => [prof.fullName, prof]),
+          ).values(),
         ).map((prof) => {
           const { bg } = getColorClass(prof.fullName);
           return (
-            <div key={prof._id} className="flex items-center gap-2">
+            <div
+              key={prof._id}
+              className='flex items-center gap-2'>
               <div className={`w-4 h-4 rounded ${bg}`}></div>
-              <span className="text-sm font-medium text-base-content">
-                {prof.fullName || "Unknown"}
+              <span className='text-sm font-medium text-base-content'>
+                {prof.fullName || 'Unknown'}
               </span>
             </div>
           );
@@ -152,7 +154,7 @@ const OccupiedRoomsList = () => {
         const professor = group?.professor;
         const slots = Array.isArray(group?.slots) ? group.slots : [];
 
-        const name = professor?.fullName || "Deleted";
+        const name = professor?.fullName || 'Deleted';
         const { border } = getColorClass(name);
 
         const uniqueSlots = slots
@@ -163,7 +165,7 @@ const OccupiedRoomsList = () => {
                   s.timeStart === slot.timeStart &&
                   s.timeEnd === slot.timeEnd &&
                   s.date === slot.date &&
-                  s.professor?._id === slot.professor?._id
+                  s.professor?._id === slot.professor?._id,
               ) === index
             );
           })
@@ -175,8 +177,8 @@ const OccupiedRoomsList = () => {
 
         // 🗓️ Group slots by weekday
         const slotsByWeekday = uniqueSlots.reduce((acc, slot) => {
-          const weekday = new Date(slot.date).toLocaleDateString("en-US", {
-            weekday: "long",
+          const weekday = new Date(slot.date).toLocaleDateString('en-US', {
+            weekday: 'long',
           });
           if (!acc[weekday]) acc[weekday] = [];
           acc[weekday].push(slot);
@@ -185,77 +187,75 @@ const OccupiedRoomsList = () => {
 
         // 📅 Sort weekdays Monday → Sunday
         const weekdayOrder = [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday',
         ];
         const sortedWeekdays = weekdayOrder.filter(
-          (day) => slotsByWeekday[day]
+          (day) => slotsByWeekday[day],
         );
 
         return (
           <div
             key={profId}
-            className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}
-          >
-            <div className="mb-2 text-md font-bold">{name}</div>
+            className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}>
+            <div className='mb-2 text-md font-bold'>{name}</div>
 
             {/* 🔄 Render slots grouped by weekday */}
             {sortedWeekdays.map((weekday) => (
               <div key={weekday}>
-                <div className="text-sm font-semibold mt-4 mb-2 underline">
+                <div className='text-sm font-semibold mt-4 mb-2 underline'>
                   {weekday}
                 </div>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   {slotsByWeekday[weekday].map((slot, index) => (
                     <div
                       key={slot._id || index}
-                      className="bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center"
-                    >
-                      <div className="text-sm text-base-content space-y-1">
+                      className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
+                      <div className='text-sm text-base-content space-y-1'>
                         <div>
                           <span>
                             {new Date(
-                              `1970-01-01T${slot.timeStart}`
-                            ).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
+                              `1970-01-01T${slot.timeStart}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
                               hour12: true,
-                            })}{" "}
-                            –{" "}
+                            })}{' '}
+                            –{' '}
                             {new Date(
-                              `1970-01-01T${slot.timeEnd}`
-                            ).toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
+                              `1970-01-01T${slot.timeEnd}`,
+                            ).toLocaleTimeString('en-US', {
+                              hour: 'numeric',
+                              minute: '2-digit',
                               hour12: true,
                             })}
-                          </span>{" "}
-                          on{" "}
-                          {new Date(slot.date).toLocaleDateString("en-US", {
-                            weekday: "long",
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
+                          </span>{' '}
+                          on{' '}
+                          {new Date(slot.date).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
                           })}
                         </div>
                         <div>
-                          <strong>{slot.building}</strong>, Floor{" "}
-                          <strong>{slot.floor}</strong>, Room{" "}
+                          <strong>{slot.building}</strong>, Floor{' '}
+                          <strong>{slot.floor}</strong>, Room{' '}
                           <strong>{slot.room}</strong>
                         </div>
                         <div>
-                          <strong>{slot.year}</strong> |{" "}
-                          <strong>{slot.subject}</strong> |{" "}
+                          <strong>{slot.year}</strong> |{' '}
+                          <strong>{slot.subject}</strong> |{' '}
                           <strong>{slot.section}</strong>
                         </div>
                       </div>
                       {dean?._id === slot.assignedBy?._id ? (
-                        <div className="flex gap-2 mt-3">
+                        <div className='flex gap-2 mt-3'>
                           <UpdateSchedule
                             prevSelectedFloor={slot.floor}
                             prevSelectedRoom={slot.room}
@@ -267,7 +267,7 @@ const OccupiedRoomsList = () => {
                             prevSelectedBuilding={slot.building}
                             buildingData={buildingData}
                             prevSelectedProff={
-                              slot.professor?.fullName || "Unknown"
+                              slot.professor?.fullName || 'Unknown'
                             }
                             scheduledID={slot._id}
                             slotData={slot}
@@ -281,15 +281,15 @@ const OccupiedRoomsList = () => {
                           />
                           <DelSchedule
                             scheduledID={slot._id}
-                            assignedProf={slot.professor.fullName}
+                            assignedProf={slot.professor?.fullName}
                             onSetOccupiedTimes={setOccupiedRooms}
                           />
                         </div>
                       ) : (
                         <span>
-                          Assigned by:{" "}
+                          Assigned by:{' '}
                           <strong>
-                            {slot.assignedBy?.fullName || "Resigned/Deleted"}
+                            {slot.assignedBy?.fullName || 'Resigned/Deleted'}
                           </strong>
                         </span>
                       )}

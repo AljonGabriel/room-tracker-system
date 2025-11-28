@@ -3,8 +3,13 @@ import Room from '../models/Room.js';
 
 export const getEmp = async (req, res) => {
   try {
-    const employees = await Employee.find(); // Fetch all records
-    res.status(200).json(employees); // Send them back to the frontend
+    const employees = await Employee.find().populate(
+      'reportsTo',
+      'fullName role',
+    );
+    // 👆 populate dean info, only return fullName + role fields
+
+    res.status(200).json(employees);
   } catch (error) {
     console.error('Error fetching employees:', error);
     res.status(500).json({ message: 'Failed to retrieve employees', error });
