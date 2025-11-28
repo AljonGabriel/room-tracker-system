@@ -1,17 +1,19 @@
-import express from "express";
+import express from 'express';
 
 import {
   addEmp,
   delEmp,
   editEmp,
   getEmp,
-} from "../controllers/employeeControllers.js";
+  delAllProff,
+} from '../controllers/employeeControllers.js';
 
 const router = express.Router();
 
-router.post("/newrecord", addEmp);
-router.get("/getemp", getEmp);
-router.put("/updateEmp/:id", editEmp);
-router.delete("/delEmp/:id", delEmp);
+router.post('/newrecord', addEmp);
+router.get('/getemp', getEmp);
+router.put('/updateEmp/:id', editEmp);
+router.delete('/delEmp/:id', delEmp);
+router.delete('/delete/allproff', delAllProff);
 
 export default router;

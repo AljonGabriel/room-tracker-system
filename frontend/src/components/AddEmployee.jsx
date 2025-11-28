@@ -5,6 +5,9 @@ import toast from 'react-hot-toast';
 const AddEmployee = ({ setEmployees }) => {
   const isLocal = window.location.hostname === 'localhost';
 
+  const storedDean = localStorage.getItem('loggedInDean');
+  const dean = storedDean ? JSON.parse(storedDean) : null;
+
   console.log('isLocal', isLocal);
   const API_BASE = isLocal
     ? 'http://localhost:5001' // 👈 your local backend
@@ -17,6 +20,7 @@ const AddEmployee = ({ setEmployees }) => {
   const [pwd, setPwd] = useState('');
 
   const [hiringDate, setHiringDate] = useState('');
+  const [reportsTo, setReportsTo] = useState(dean?.fullName);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +37,7 @@ const AddEmployee = ({ setEmployees }) => {
         username,
         pwd,
         hiringDate,
+        reportsTo,
       };
 
       const result = await axios.post(
@@ -56,7 +61,7 @@ const AddEmployee = ({ setEmployees }) => {
     <div>
       <label
         htmlFor='add-employee-modal'
-        className='btn btn-primary btn-sm cursor-pointer'>
+        className='btn btn-primary btn-outline btn-sm cursor-pointer'>
         Add Employee
       </label>
 
@@ -111,9 +116,7 @@ const AddEmployee = ({ setEmployees }) => {
                     className='input input-bordered w-full'
                     placeholder='John Doe'
                     value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                    }}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
@@ -124,9 +127,23 @@ const AddEmployee = ({ setEmployees }) => {
                     type='password'
                     className='input input-bordered w-full'
                     value={pwd}
-                    onChange={(e) => {
-                      setPwd(e.target.value);
-                    }}
+                    onChange={(e) => setPwd(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {role === 'Instructor' && (
+              <>
+                <div>
+                  <label className='label font-medium'>Reporting to</label>
+                  <input
+                    type='text'
+                    className='input input-bordered w-full'
+                    placeholder='John Doe'
+                    value={reportsTo}
+                    disabled
                     required
                   />
                 </div>
