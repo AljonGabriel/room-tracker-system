@@ -46,7 +46,7 @@ export const addEmp = async (req, res) => {
 
 export const editEmp = async (req, res) => {
   const { id } = req.params;
-  const { fullName, role } = req.body;
+  const { fullName, role, username, pwd } = req.body;
 
   if (!fullName || !role) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -55,7 +55,7 @@ export const editEmp = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(
       id,
-      { fullName, role },
+      { fullName, role, username, pwd },
       { new: true, runValidators: true },
     );
 

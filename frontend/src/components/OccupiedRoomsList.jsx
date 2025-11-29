@@ -150,157 +150,168 @@ const OccupiedRoomsList = () => {
       </div>
 
       {/* 📚 Grouped Slot Display by Professor → Weekday */}
-      {Object.entries(groupedByProfessor).map(([profId, group]) => {
-        const professor = group?.professor;
-        const slots = Array.isArray(group?.slots) ? group.slots : [];
+      {Object.keys(groupedByProfessor).length === 0 ? (
+        <div className='text-center mt-10 space-y-2'>
+          <p className='text-sm text-base-content opacity-70'>
+            There's no room assigned yet.
+          </p>
+          <a
+            href='/home'
+            className='btn btn-sm btn-primary'>
+            Create one?
+          </a>
+        </div>
+      ) : (
+        Object.entries(groupedByProfessor).map(([profId, group]) => {
+          const professor = group?.professor;
+          const slots = Array.isArray(group?.slots) ? group.slots : [];
 
-        const name = professor?.fullName || 'Deleted';
-        const { border } = getColorClass(name);
+          const name = professor?.fullName || 'Deleted';
+          const { border } = getColorClass(name);
 
-        const uniqueSlots = slots
-          .filter((slot, index, self) => {
-            return (
-              self.findIndex(
-                (s) =>
-                  s.timeStart === slot.timeStart &&
-                  s.timeEnd === slot.timeEnd &&
-                  s.date === slot.date &&
-                  s.professor?._id === slot.professor?._id,
-              ) === index
-            );
-          })
-          .sort((a, b) => {
-            const timeA = new Date(`1970-01-01T${a.timeStart}`);
-            const timeB = new Date(`1970-01-01T${b.timeStart}`);
-            return timeA - timeB;
-          });
+          const uniqueSlots = slots
+            .filter((slot, index, self) => {
+              return (
+                self.findIndex(
+                  (s) =>
+                    s.timeStart === slot.timeStart &&
+                    s.timeEnd === slot.timeEnd &&
+                    s.date === slot.date &&
+                    s.professor?._id === slot.professor?._id,
+                ) === index
+              );
+            })
+            .sort((a, b) => {
+              const timeA = new Date(`1970-01-01T${a.timeStart}`);
+              const timeB = new Date(`1970-01-01T${b.timeStart}`);
+              return timeA - timeB;
+            });
 
-        // 🗓️ Group slots by weekday
-        const slotsByWeekday = uniqueSlots.reduce((acc, slot) => {
-          const weekday = new Date(slot.date).toLocaleDateString('en-US', {
-            weekday: 'long',
-          });
-          if (!acc[weekday]) acc[weekday] = [];
-          acc[weekday].push(slot);
-          return acc;
-        }, {});
+          const slotsByWeekday = uniqueSlots.reduce((acc, slot) => {
+            const weekday = new Date(slot.date).toLocaleDateString('en-US', {
+              weekday: 'long',
+            });
+            if (!acc[weekday]) acc[weekday] = [];
+            acc[weekday].push(slot);
+            return acc;
+          }, {});
 
-        // 📅 Sort weekdays Monday → Sunday
-        const weekdayOrder = [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-          'Sunday',
-        ];
-        const sortedWeekdays = weekdayOrder.filter(
-          (day) => slotsByWeekday[day],
-        );
+          const weekdayOrder = [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday',
+          ];
+          const sortedWeekdays = weekdayOrder.filter(
+            (day) => slotsByWeekday[day],
+          );
 
-        return (
-          <div
-            key={profId}
-            className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}>
-            <div className='mb-2 text-md font-bold'>{name}</div>
+          return (
+            <div
+              key={profId}
+              className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}>
+              <div className='mb-2 text-md font-bold'>{name}</div>
 
-            {/* 🔄 Render slots grouped by weekday */}
-            {sortedWeekdays.map((weekday) => (
-              <div key={weekday}>
-                <div className='text-sm font-semibold mt-4 mb-2 underline'>
-                  {weekday}
-                </div>
-                <div className='space-y-2'>
-                  {slotsByWeekday[weekday].map((slot, index) => (
-                    <div
-                      key={slot._id || index}
-                      className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
-                      <div className='text-sm text-base-content space-y-1'>
-                        <div>
-                          <span>
-                            {new Date(
-                              `1970-01-01T${slot.timeStart}`,
-                            ).toLocaleTimeString('en-US', {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true,
-                            })}{' '}
-                            –{' '}
-                            {new Date(
-                              `1970-01-01T${slot.timeEnd}`,
-                            ).toLocaleTimeString('en-US', {
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true,
+              {sortedWeekdays.map((weekday) => (
+                <div key={weekday}>
+                  <div className='text-sm font-semibold mt-4 mb-2 underline'>
+                    {weekday}
+                  </div>
+                  <div className='space-y-2'>
+                    {slotsByWeekday[weekday].map((slot, index) => (
+                      <div
+                        key={slot._id || index}
+                        className='bg-base-200 rounded-md p-2 text-sm text-base-content flex justify-between items-center'>
+                        <div className='text-sm text-base-content space-y-1'>
+                          <div>
+                            <span>
+                              {new Date(
+                                `1970-01-01T${slot.timeStart}`,
+                              ).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                              })}{' '}
+                              –{' '}
+                              {new Date(
+                                `1970-01-01T${slot.timeEnd}`,
+                              ).toLocaleTimeString('en-US', {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                                hour12: true,
+                              })}
+                            </span>{' '}
+                            on{' '}
+                            {new Date(slot.date).toLocaleDateString('en-US', {
+                              weekday: 'long',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
                             })}
-                          </span>{' '}
-                          on{' '}
-                          {new Date(slot.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
+                          </div>
+                          <div>
+                            <strong>{slot.building}</strong>, Floor{' '}
+                            <strong>{slot.floor}</strong>, Room{' '}
+                            <strong>{slot.room}</strong>
+                          </div>
+                          <div>
+                            <strong>{slot.year}</strong> |{' '}
+                            <strong>{slot.subject}</strong> |{' '}
+                            <strong>{slot.section}</strong>
+                          </div>
                         </div>
-                        <div>
-                          <strong>{slot.building}</strong>, Floor{' '}
-                          <strong>{slot.floor}</strong>, Room{' '}
-                          <strong>{slot.room}</strong>
-                        </div>
-                        <div>
-                          <strong>{slot.year}</strong> |{' '}
-                          <strong>{slot.subject}</strong> |{' '}
-                          <strong>{slot.section}</strong>
-                        </div>
+                        {dean?._id === slot.assignedBy?._id ||
+                        dean?.role === 'SuperAdmin' ? (
+                          <div className='flex gap-2 mt-3'>
+                            <UpdateSchedule
+                              prevSelectedFloor={slot.floor}
+                              prevSelectedRoom={slot.room}
+                              selectedDate={slot.date}
+                              selectedDean={slot.assignedBy.fullName}
+                              prevSelectedYear={slot.year}
+                              prevSelectedSubject={slot.subject}
+                              prevSelectedSection={slot.section}
+                              prevSelectedBuilding={slot.building}
+                              buildingData={buildingData}
+                              prevSelectedProff={
+                                slot.professor?.fullName || 'Unknown'
+                              }
+                              scheduledID={slot._id}
+                              slotData={slot}
+                              timeEnd={slot.timeEnd}
+                              timeStart={slot.timeStart}
+                              timeSlots={timeSlots}
+                              occupiedTimes={occupiedRooms}
+                              onSetOccupiedTimes={setOccupiedRooms}
+                              subjectsByYear={subjectsByYear}
+                              sections={sections}
+                            />
+                            <DelSchedule
+                              scheduledID={slot._id}
+                              assignedProf={slot.professor?.fullName}
+                              onSetOccupiedTimes={setOccupiedRooms}
+                            />
+                          </div>
+                        ) : (
+                          <span>
+                            Assigned by:{' '}
+                            <strong>
+                              {slot.assignedBy?.fullName || 'Resigned/Deleted'}
+                            </strong>
+                          </span>
+                        )}
                       </div>
-                      {dean?._id === slot.assignedBy?._id ? (
-                        <div className='flex gap-2 mt-3'>
-                          <UpdateSchedule
-                            prevSelectedFloor={slot.floor}
-                            prevSelectedRoom={slot.room}
-                            selectedDate={slot.date}
-                            selectedDean={slot.assignedBy.fullName}
-                            prevSelectedYear={slot.year}
-                            prevSelectedSubject={slot.subject}
-                            prevSelectedSection={slot.section}
-                            prevSelectedBuilding={slot.building}
-                            buildingData={buildingData}
-                            prevSelectedProff={
-                              slot.professor?.fullName || 'Unknown'
-                            }
-                            scheduledID={slot._id}
-                            slotData={slot}
-                            timeEnd={slot.timeEnd}
-                            timeStart={slot.timeStart}
-                            timeSlots={timeSlots}
-                            occupiedTimes={occupiedRooms}
-                            onSetOccupiedTimes={setOccupiedRooms}
-                            subjectsByYear={subjectsByYear}
-                            sections={sections}
-                          />
-                          <DelSchedule
-                            scheduledID={slot._id}
-                            assignedProf={slot.professor?.fullName}
-                            onSetOccupiedTimes={setOccupiedRooms}
-                          />
-                        </div>
-                      ) : (
-                        <span>
-                          Assigned by:{' '}
-                          <strong>
-                            {slot.assignedBy?.fullName || 'Resigned/Deleted'}
-                          </strong>
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        );
-      })}
+              ))}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 };

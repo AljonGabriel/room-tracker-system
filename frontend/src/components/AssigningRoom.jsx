@@ -485,7 +485,7 @@ const AssigningRoom = () => {
                 <option
                   key={f}
                   value={floorNum}>
-                  {floorNum}
+                  {floorNum === 1 ? 'Ground Floor' : `${floorNum}`}
                 </option>
               );
             })}

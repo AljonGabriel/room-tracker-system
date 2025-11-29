@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const EditEmployee = ({ empID, empName, empRole, setEmployees }) => {
+const EditEmployee = ({
+  empID,
+  empName,
+  empRole,
+  empUsername,
+  empPwd,
+  setEmployees,
+}) => {
   const isLocal = window.location.hostname === 'localhost';
 
   const API_BASE = isLocal
@@ -13,10 +20,16 @@ const EditEmployee = ({ empID, empName, empRole, setEmployees }) => {
   const [updatedName, setUpdatedName] = useState(empName || '');
   const [updatedRole, setUpdatedRole] = useState(empRole || '');
 
+  const [updateUsername, setUpdateUsername] = useState(empUsername || '');
+  const [updatePWD, setUpdatePWD] = useState(empPwd || '');
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleSubmit = async () => {
     const payload = {
       fullName: updatedName,
       role: updatedRole,
+      username: updateUsername,
+      pwd: updatePWD,
     };
 
     try {
@@ -86,6 +99,40 @@ const EditEmployee = ({ empID, empName, empRole, setEmployees }) => {
                   <option value='Dean'>Dean</option>
                   <option value='Instructor'>Instructor</option>
                 </select>
+              </div>
+
+              <div>
+                <label className='label'>
+                  <span className='label-text'>Username</span>
+                </label>
+                <input
+                  type='text'
+                  placeholder='Enter name'
+                  className='input input-bordered w-full'
+                  onChange={(e) => setUpdateUsername(e.target.value)}
+                  value={updateUsername}
+                />
+              </div>
+
+              <div>
+                <label className='label'>
+                  <span className='label-text'>Password</span>
+                </label>
+                <div className='relative w-full'>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder='Enter password'
+                    className='input input-bordered w-full pr-10'
+                    onChange={(e) => setUpdatePWD(e.target.value)}
+                    value={updatePWD}
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-2 top-2 text-sm text-gray-500'
+                    onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
               </div>
 
               <div className='modal-action'>

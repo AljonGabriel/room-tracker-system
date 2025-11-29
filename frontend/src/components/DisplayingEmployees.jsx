@@ -52,7 +52,13 @@ const DisplayingEmployees = () => {
       <div className='max-w-6xl mx-auto px-4'>
         <div className='flex gap-3 items-center mb-6'>
           <AddEmployee setEmployees={setEmployees} />
-          <ImportCSV />
+        </div>
+
+        <div className='flex gap-3 items-center mb-6'>
+          <ImportCSV
+            setEmployees={setEmployees}
+            API_BASE={API_BASE}
+          />
         </div>
 
         <div className='max-h-[500px] overflow-y-auto rounded-lg shadow-inner bg-gray-700 p-2 mb-2'>
@@ -85,6 +91,8 @@ const DisplayingEmployees = () => {
                           empID={emp._id}
                           empName={emp.fullName}
                           empRole={emp.role}
+                          empUsername={emp.username}
+                          empPwd={emp.pwd}
                           setEmployees={setEmployees}
                         />
                         <DeleteEmployee
@@ -108,8 +116,10 @@ const DisplayingEmployees = () => {
           </table>
         </div>
         <div className='max-h-[500px] overflow-y-auto rounded-lg shadow-inner bg-gray-700 p-2'>
-          <h2 className='text-xl font-semibold text-white m-3'>Instructors</h2>
-          <DelAllProff />
+          <div className='flex items-center m-3 gap-2'>
+            <h2 className='text-xl font-semibold text-white'>Instructors</h2>
+            <DelAllProff />
+          </div>
           <table className='table table-zebra w-full bg-base-100 rounded-lg shadow-md'>
             <thead className='bg-neutral text-neutral-content'>
               <tr>
