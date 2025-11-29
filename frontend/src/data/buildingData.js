@@ -64,6 +64,7 @@ const buildingLayouts = {
         'R410',
         'R411',
         'Music Room',
+        'Multi Purpose Hall ',
       ],
       image: '/assets/floorplans/mainbuilding-right-4th.jpg',
     },
