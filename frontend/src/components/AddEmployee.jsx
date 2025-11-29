@@ -57,6 +57,8 @@ const AddEmployee = ({ setEmployees }) => {
     }
   };
 
+  console.log('role', role);
+
   return (
     <div>
       <label
@@ -95,20 +97,17 @@ const AddEmployee = ({ setEmployees }) => {
             {/* Role Dropdown */}
             <div>
               <label className='label font-medium'>Role</label>
+
               <select
                 className='select select-bordered w-full'
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 required>
-                {dean?.role === 'SuperAdmin' ? (
-                  <>
-                    <option value=''>Select Role</option>
-                    <option value='Instructor'>Instructor</option>
-                    <option value='Dean'>Dean</option>
-                  </>
-                ) : (
-                  <option value='Instructor'>Instructor</option>
+                <option value=''>Select Role</option>
+                {dean?.role === 'SuperAdmin' && (
+                  <option value='Dean'>Dean</option>
                 )}
+                <option value='Instructor'>Instructor</option>
               </select>
             </div>
             {role === 'Dean' && (
@@ -145,7 +144,7 @@ const AddEmployee = ({ setEmployees }) => {
                     type='text'
                     className='input input-bordered w-full'
                     placeholder='John Doe'
-                    value={reportsTo}
+                    value={reportsTo && dean?.fullName}
                     disabled
                     required
                   />

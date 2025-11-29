@@ -144,7 +144,7 @@ const DisplayingEmployees = () => {
                       {new Date(emp.hiringDate).toLocaleDateString('en-US')}
                     </b>
                   </td>
-                  <td>{emp?.reportsTo?.fullName}</td>
+                  <td>{emp.reportsTo?.fullName}</td>
                   {loggedInDean?.role === 'SuperAdmin' ||
                   loggedInDean?._id === emp.reportsTo?._id ? (
                     <td>

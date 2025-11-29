@@ -35,9 +35,14 @@ export const addEmp = async (req, res) => {
 
     const employed = await newEmployee.save();
 
+    const populated = await Employee.findById(employed._id).populate(
+      'reportsTo',
+      'fullName role',
+    );
+
     res
       .status(201)
-      .json({ message: 'New employee added', newRecord: employed });
+      .json({ message: 'New employee added', newRecord: populated });
   } catch (error) {
     console.log(error);
     res.status(200).json({ message: 'Employee received', error });
@@ -90,6 +95,9 @@ export const delEmp = async (req, res) => {
 
     // Cascade delete: remove all rooms assigned by this employee
     await Room.deleteMany({ assignedBy: id });
+
+    // Cascade delete: remove all rooms assigned by this employee
+    await Room.deleteMany({ professor: id });
 
     return res.status(200).json({
       message: '✅ Employee and their assigned rooms deleted successfully.',
