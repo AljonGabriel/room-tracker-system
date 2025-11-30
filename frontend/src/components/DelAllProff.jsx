@@ -1,42 +1,48 @@
-import React from 'react';
-import axios from 'axios';
+import React from "react";
+import axios from "axios";
 
-const DelAllProff = () => {
-  const storedDean = localStorage.getItem('loggedInDean');
+const DelAllProff = ({ setEmployees }) => {
+  const storedDean = localStorage.getItem("loggedInDean");
   const loggedInDean = storedDean ? JSON.parse(storedDean) : null;
 
-  const isLocal = window.location.hostname === 'localhost';
-
+  const isLocal = window.location.hostname === "localhost";
   const API_BASE = isLocal
-    ? 'http://localhost:5001' // 👈 your local backend
-    : import.meta.env.VITE_API_BASE; // 👈 your Render backend
+    ? "http://localhost:5001"
+    : import.meta.env.VITE_API_BASE;
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      'Are you sure you want to delete ALL professors? This action cannot be undone.',
+      "Are you sure you want to delete ALL instructors/professors? This action cannot be undone."
     );
-
-    if (!confirmed) return; // stop if user cancels
+    if (!confirmed) return;
 
     try {
       const res = await axios.delete(
-        `${API_BASE}/api/employees/delete/allproff`,
+        `${API_BASE}/api/employees/delete/allproff`
       );
 
-      alert(`${res.data.deletedCount} professors deleted successfully!`);
+      // ✅ Only remove instructors/professors locally, keep deans/superadmins
+      setEmployees((prev) =>
+        prev.filter(
+          (emp) => emp.role !== "Instructor" && emp.role !== "Professor"
+        )
+      );
+
+      alert(`${res.data.deletedCount} instructors deleted successfully!`);
     } catch (error) {
-      console.error('Error deleting professors:', error);
-      alert('Failed to delete professors');
+      console.error("Error deleting instructors:", error);
+      alert("Failed to delete instructors");
     }
   };
 
   return (
     <>
-      {loggedInDean?.role === 'SuperAdmin' && (
+      {loggedInDean?.role === "SuperAdmin" && (
         <button
           onClick={handleDelete}
-          className='btn btn-error btn-sm cursor-pointer'>
-          Delete Professors
+          className="btn btn-error btn-sm cursor-pointer"
+        >
+          Delete All
         </button>
       )}
     </>

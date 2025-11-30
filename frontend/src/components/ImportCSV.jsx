@@ -28,6 +28,7 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
     fetchEmployees();
   }, [API_BASE]);
 
+  // 📂 Handle CSV file upload and parse
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -39,6 +40,7 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
         const expectedHeaders = ["Name", "Role", "Reports To", "Hiring Date"];
         const fileHeaders = results.meta.fields;
 
+        // ✅ Validate headers
         const missingHeaders = expectedHeaders.filter(
           (h) => !fileHeaders.includes(h)
         );
@@ -53,6 +55,7 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
     });
   };
 
+  // 🚀 Handle import logic
   const handleImport = async () => {
     if (rows.length === 0) {
       toast.error("No data to import!");
@@ -60,11 +63,15 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
     }
 
     try {
+      const validPayloads = [];
+
       for (const [i, row] of rows.entries()) {
         // ✅ Only allow Instructor rows
         if (row.Role !== "Instructor") {
-          toast.error(`Row ${i + 2}: Only Instructors can be imported.`);
-          return; // stop import
+          toast.error(
+            `Row ${i + 2}: Only Instructors can be imported. Skipping...`
+          );
+          continue;
         }
 
         // ✅ Required fields check
@@ -77,42 +84,63 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
           toast.error(
             `Row ${
               i + 2
-            }: All fields (Name, Role, Reports To, Hiring Date) are required.`
+            }: All fields (Name, Role, Reports To, Hiring Date) are required. Skipping...`
           );
-          return; // stop import
+          continue;
+        }
+
+        // 🔎 Duplicate check: skip if instructor already exists
+        if (employeesMap[row.Name.trim()]) {
+          toast.error(
+            `Row ${i + 2}: Instructor "${row.Name}" already exists. Skipping...`
+          );
+          continue;
         }
 
         // 🔎 Lookup Reports To name in employeesMap
         const reportsToId = employeesMap[row["Reports To"].trim()];
         if (!reportsToId) {
           toast.error(
-            `Row ${i + 2}: Reports To "${row["Reports To"]}" not found in DB.`
+            `Row ${i + 2}: Reports To "${
+              row["Reports To"]
+            }" not found in DB. Skipping...`
           );
-          return; // stop import
+          continue;
         }
 
-        const payload = {
-          fullName: row.Name,
+        // ✅ Build payload
+        validPayloads.push({
+          fullName: row.Name.trim(),
           role: row.Role,
           hiringDate: row["Hiring Date"],
-          reportsTo: reportsToId, // ✅ use ObjectId instead of string
-        };
-
-        const result = await axios.post(
-          `${API_BASE}/api/employees/newrecord`,
-          payload
-        );
-
-        setEmployees((prev) => [...prev, result.data.newRecord]);
-        toast.success(`Instructor ${row.Name} added successfully!`);
+          reportsTo: reportsToId, // use ObjectId instead of string
+        });
       }
 
+      if (validPayloads.length === 0) {
+        toast.error("No valid rows to import!");
+        return;
+      }
+
+      // 📡 Batch insert all valid instructors
+      const results = await Promise.all(
+        validPayloads.map((payload) =>
+          axios.post(`${API_BASE}/api/employees/newrecord`, payload)
+        )
+      );
+
+      const newRecords = results.map((res) => res.data.newRecord);
+      setEmployees((prev) => [...prev, ...newRecords]);
+
+      toast.success(`${newRecords.length} instructors imported successfully!`);
+
+      // 🔄 Reset state and clear file input
       setRows([]);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     } catch (error) {
-      toast.error("Failed to import employees");
+      toast.error("Failed to import instructors");
       console.error(error);
     }
   };
@@ -131,15 +159,8 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
         </p>
       </div>
 
-      {/* Title bar */}
-      <div className="px-3 py-2 border-b bg-gray-100 rounded-t">
-        <label className="text-sm font-semibold text-gray-700">
-          Insert multiple instructors
-        </label>
-      </div>
-
       {/* Action block */}
-      <div className="border border-gray-300 rounded p-3 flex items-center gap-3 bg-gray-50">
+      <div className="border border-gray-100 rounded p-3 flex items-center gap-3">
         <input
           ref={fileInputRef}
           type="file"
@@ -150,6 +171,9 @@ const ImportCSV = ({ API_BASE, setEmployees }) => {
         <button
           onClick={handleImport}
           className="btn btn-secondary btn-outline btn-sm"
+          disabled={
+            !fileInputRef.current || fileInputRef.current.files.length === 0
+          }
         >
           Import CSV
         </button>
