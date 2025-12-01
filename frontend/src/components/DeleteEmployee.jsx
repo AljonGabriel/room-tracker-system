@@ -7,7 +7,6 @@ const DeleteEmployee = ({ empID, empName, setEmployees }) => {
   const dean = storedDean ? JSON.parse(storedDean) : null;
 
   const isLocal = window.location.hostname === "localhost";
-
   const API_BASE = isLocal
     ? "http://localhost:5001" // 👈 your local backend
     : import.meta.env.VITE_API_BASE; // 👈 your Render backend
@@ -22,23 +21,24 @@ const DeleteEmployee = ({ empID, empName, setEmployees }) => {
   const isSelfDelete = dean?._id === empID; // ✅ check if deleting own account
 
   const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete ALL professors? This action cannot be undone."
-    );
-    if (!confirmed) return;
-
     try {
       const res = await axios.delete(
-        `${API_BASE}/api/employees/delete/allproff`
+        `${API_BASE}/api/employees/delEmp/${empID}`
       );
 
-      // 🔎 Remove professors locally, keep deans visible
-      setEmployees((prev) => prev.filter((emp) => emp.role !== "Instructor"));
+      // 🔎 Remove just this employee locally
+      setEmployees((prev) => prev.filter((emp) => emp._id !== empID));
 
-      alert(`${res.data.deletedCount} professors deleted successfully!`);
+      toast.success(`${empName} deleted successfully!`);
+
+      if (isSelfDelete) {
+        handleLogout();
+      }
     } catch (error) {
-      console.error("Error deleting professors:", error);
-      alert("Failed to delete professors");
+      console.error("Error deleting employee:", error);
+      toast.error("Failed to delete employee");
+    } finally {
+      setIsOpen(false);
     }
   };
 
