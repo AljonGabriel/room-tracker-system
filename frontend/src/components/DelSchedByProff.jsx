@@ -30,7 +30,7 @@ const DelSchedByProff = ({ profID, profName, refreshRooms }) => {
       <button
         className='btn btn-sm btn-outline btn-warning'
         onClick={() => setIsOpen(true)}>
-        Delete Assigned Rooms
+        Delete Assigned Rooms (Under Development)
       </button>
 
       {isOpen && (
