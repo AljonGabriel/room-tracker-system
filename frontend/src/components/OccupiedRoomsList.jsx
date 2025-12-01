@@ -6,6 +6,7 @@ import DelSchedule from './DelSchedule.jsx';
 import buildingData from '../data/buildingData.js';
 import subjectsByYear from '../data/subjectsByYear.js';
 import sections from '../data/sections.js';
+import DelSchedByProff from './DelSchedByProff.jsx';
 
 const OccupiedRoomsList = () => {
   const storedDean = localStorage.getItem('loggedInDean');
@@ -214,6 +215,10 @@ const OccupiedRoomsList = () => {
               key={profId}
               className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}>
               <div className='mb-2 text-md font-bold'>{name}</div>
+              <DelSchedByProff
+                profID={profId}
+                profName={name}
+              />
 
               {sortedWeekdays.map((weekday) => (
                 <div key={weekday}>
