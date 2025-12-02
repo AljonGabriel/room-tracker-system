@@ -188,6 +188,17 @@ const OccupiedRoomsList = () => {
               return timeA - timeB;
             });
 
+          console.log(
+            'Deans ID:',
+            dean?._id,
+            'Professor ID:',
+            professor?._id,
+            'Group',
+            group,
+
+            slots,
+          );
+
           const slotsByWeekday = uniqueSlots.reduce((acc, slot) => {
             const weekday = new Date(slot.date).toLocaleDateString('en-US', {
               weekday: 'long',
@@ -215,11 +226,14 @@ const OccupiedRoomsList = () => {
               key={profId}
               className={`border-2 rounded p-4 bg-neutral text-neutral-content h-auto overflow-y-auto ${border}`}>
               <div className='mb-2 text-md font-bold'>{name}</div>
-              <DelSchedByProff
-                profID={profId}
-                profName={name}
-                onSetOccupiedTimes={setOccupiedRooms}
-              />
+              {(dean?._id === slots[0]?.assignedBy?._id ||
+                dean?.role === 'SuperAdmin') && (
+                <DelSchedByProff
+                  profID={profId}
+                  profName={name}
+                  onSetOccupiedTimes={setOccupiedRooms}
+                />
+              )}
 
               {sortedWeekdays.map((weekday) => (
                 <div key={weekday}>
