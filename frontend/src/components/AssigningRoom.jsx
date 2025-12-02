@@ -420,9 +420,9 @@ const AssigningRoom = () => {
               value=''>
               ...
             </option>
-            {subjectOptions.map((subj) => (
+            {subjectOptions.map((subj, index) => (
               <option
-                key={subj}
+                key={`${subj}-${index}`}
                 value={subj}>
                 {subj}
               </option>

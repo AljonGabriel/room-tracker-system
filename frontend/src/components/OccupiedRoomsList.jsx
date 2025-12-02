@@ -218,6 +218,7 @@ const OccupiedRoomsList = () => {
               <DelSchedByProff
                 profID={profId}
                 profName={name}
+                onSetOccupiedTimes={setOccupiedRooms}
               />
 
               {sortedWeekdays.map((weekday) => (

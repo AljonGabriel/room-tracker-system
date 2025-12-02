@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const DelSchedByProff = ({ profID, profName, refreshRooms }) => {
+const DelSchedByProff = ({ profID, profName, onSetOccupiedTimes }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const isLocal = window.location.hostname === 'localhost';
@@ -12,11 +12,22 @@ const DelSchedByProff = ({ profID, profName, refreshRooms }) => {
 
   const handleDelete = async () => {
     try {
-      const res = await axios.delete(`${API_BASE}/api/rooms/byprof/${profID}`);
+      const res = await axios.delete(
+        `${API_BASE}/api/employees/byprof/${profID}`,
+      );
       toast.success(
         `Deleted ${res.data.deletedCount} room(s) assigned to ${profName}`,
       );
-      refreshRooms?.(); // optional callback to refresh room list
+      onSetOccupiedTimes((prev) =>
+        prev.filter((room) => {
+          const profRef =
+            typeof room.professor === 'object'
+              ? room.professor?._id // populated object
+              : room.professor; // plain id
+
+          return String(profRef) !== String(profID);
+        }),
+      );
     } catch (error) {
       console.error('Error deleting rooms:', error);
       toast.error('Failed to delete assigned rooms');
