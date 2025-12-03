@@ -10,7 +10,8 @@ import OccupiedRoomsPage from './pages/OccupiedRoomsPage.jsx';
 
 const App = () => {
   return (
-    <div className=''>
+    <div className='min-h-screen bg-base-100 text-base-content'>
+      {/* optional: include Navbar here if you want it global */}
       <Routes>
         <Route
           path='/'

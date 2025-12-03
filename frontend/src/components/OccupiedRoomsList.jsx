@@ -7,6 +7,7 @@ import buildingData from '../data/buildingData.js';
 import subjectsByYear from '../data/subjectsByYear.js';
 import sections from '../data/sections.js';
 import DelSchedByProff from './DelSchedByProff.jsx';
+import getColorClass from '../utils/getColorClass.js';
 
 const OccupiedRoomsList = () => {
   const storedDean = localStorage.getItem('loggedInDean');
@@ -93,20 +94,6 @@ const OccupiedRoomsList = () => {
 
   console.log('Grouped by Professor:', groupedByProfessor);
 
-  const colors = colorPalette;
-
-  // Assign a consistent color to each unique name using a cache
-  const getColorClass = (() => {
-    const cache = {};
-    return (name) => {
-      if (!cache[name]) {
-        const index = Object.keys(cache).length % colors.length;
-        cache[name] = colors[index];
-      }
-      return cache[name];
-    };
-  })();
-
   // Get all time slots between start and end (inclusive)
 
   const generateTimeSlots = () => {
@@ -136,7 +123,8 @@ const OccupiedRoomsList = () => {
               .map((prof) => [prof.fullName, prof]),
           ).values(),
         ).map((prof) => {
-          const { bg } = getColorClass(prof.fullName);
+          const { bg } = getColorClass(prof.fullName); // first word decides color
+
           return (
             <div
               key={prof._id}
@@ -168,7 +156,7 @@ const OccupiedRoomsList = () => {
           const slots = Array.isArray(group?.slots) ? group.slots : [];
 
           const name = professor?.fullName || 'Deleted';
-          const { border } = getColorClass(name);
+          const { border } = getColorClass(name); // safe
 
           const uniqueSlots = slots
             .filter((slot, index, self) => {

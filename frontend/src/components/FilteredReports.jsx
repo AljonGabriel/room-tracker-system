@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import buildingData from "../data/buildingData";
-import subjectsByYear from "../data/subjectsByYear.js";
-import sections from "../data/sections.js";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import buildingData from '../data/buildingData';
+import subjectsByYear from '../data/subjectsByYear.js';
+import sections from '../data/sections.js';
 
 const FilteredReports = () => {
-  const isLocal = window.location.hostname === "localhost";
+  const isLocal = window.location.hostname === 'localhost';
 
   const API_BASE = isLocal
-    ? "http://localhost:5001" // 👈 your local backend
+    ? 'http://localhost:5001' // 👈 your local backend
     : import.meta.env.VITE_API_BASE; // 👈 your Render backend
 
   const [schedule, setSchedule] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedFilter, setSelectedFilter] = useState("Instructor");
-  const [selectedValue, setSelectedValue] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState('Instructor');
+  const [selectedValue, setSelectedValue] = useState('');
 
   const [instructorsList, setInstructorList] = useState([]);
   const [deansList, setDeansList] = useState([]);
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState('');
 
-  console.log("selectedValue: ", selectedValue);
+  console.log('selectedValue: ', selectedValue);
   useEffect(() => {
     if (!selectedValue) return;
 
@@ -34,12 +34,12 @@ const FilteredReports = () => {
               filterType: selectedFilter.toLowerCase(),
               value: selectedValue,
             },
-          }
+          },
         );
         setSchedule(res.data);
-        console.log("✅ Schedule loaded:", res.data);
+        console.log('✅ Schedule loaded:', res.data);
       } catch (error) {
-        console.error("❌ Failed to fetch schedule:", error);
+        console.error('❌ Failed to fetch schedule:', error);
       } finally {
         setLoading(false);
       }
@@ -47,9 +47,9 @@ const FilteredReports = () => {
 
     fetchSchedule();
   }, [selectedValue]);
-  console.log("schedule:", schedule);
+  console.log('schedule:', schedule);
 
-  console.log("SV:", selectedFilter);
+  console.log('SV:', selectedFilter);
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
@@ -57,18 +57,18 @@ const FilteredReports = () => {
         const employees = res.data;
 
         const instructors = employees
-          .filter((emp) => emp.role === "Instructor")
+          .filter((emp) => emp.role === 'Instructor')
           .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
 
         setInstructorList(instructors); // ✅ Add this state if needed
 
         const deans = employees
-          .filter((emp) => emp.role === "Dean")
+          .filter((emp) => emp.role === 'Dean')
           .map((emp) => ({ id: emp._id, fullName: emp.fullName }));
 
         setDeansList(deans); // ✅ Add this state if needed
       } catch (error) {
-        console.error("❌ Failed to fetch employees", error);
+        console.error('❌ Failed to fetch employees', error);
 
         setInstructorList([]);
       }
@@ -77,12 +77,12 @@ const FilteredReports = () => {
     fetchEmployees();
   }, []);
 
-  console.log("selectedFilter:", selectedFilter);
-  console.log("selectedValue:", selectedValue);
+  console.log('selectedFilter:', selectedFilter);
+  console.log('selectedValue:', selectedValue);
 
-  console.log("instructorsList:", instructorsList);
-  console.log("Type of instructorsList:", typeof instructorsList);
-  console.log("Is array:", Array.isArray(instructorsList));
+  console.log('instructorsList:', instructorsList);
+  console.log('Type of instructorsList:', typeof instructorsList);
+  console.log('Is array:', Array.isArray(instructorsList));
 
   const buildingList = Object.keys(buildingData);
 
@@ -95,13 +95,13 @@ const FilteredReports = () => {
     return acc;
   }, {});
 
-  console.log("groupedByProfessor filtered reports: ", groupedByProfessor);
+  console.log('groupedByProfessor filtered reports: ', groupedByProfessor);
 
   const handlePrintCard = (professor) => {
     const printArea = document.getElementById(`print-area-${professor}`);
     if (!printArea) return;
 
-    const printWindow = window.open("", "", "width=800,height=600");
+    const printWindow = window.open('', '', 'width=800,height=600');
     printWindow.document.write(`
     <html>
       <head>
@@ -111,18 +111,71 @@ const FilteredReports = () => {
         <style>
           body {
             padding: 2rem;
-            font-family: sans-serif;
+            font-family: 'Inter', sans-serif;
             background: white;
+            color: #111827;
           }
-          .table th, .table td {
-            border: 1px solid #ccc;
-            padding: 8px;
+          .header {
             text-align: center;
+            margin-bottom: 1.5rem;
+          }
+          .header img {
+            display: block;
+            margin: 0 auto 0.5rem auto;
+            height: 60px; /* ✅ smaller logo for print */
+            width: auto;
+          }
+          h1 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+          }
+          h2 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin: 0.25rem 0 0;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+          }
+          th {
+            background: #374151;
+            color: white;
+          }
+          tr:nth-child(even) {
+            background: #FFF8E7; /* Cosmic Latte */
+          }
+          tr:nth-child(odd) {
+            background: #f5f0dc; /* slightly darker */
+          }
+          .footer {
+            margin-top: 2rem;
+            text-align: right;
+            font-size: 0.75rem;
+            color: #6b7280;
           }
         </style>
       </head>
       <body>
-        ${printArea.innerHTML}
+        <div class="header">
+          <img src="/favicon.png" alt="City College of Angeles Logo" />
+          <h1>City College of Angeles</h1>
+          <h2>Institute of Business and Management</h2>
+        </div>
+        ${printArea.querySelector('table').outerHTML}
+        <div class="footer">
+          Printed on ${new Date().toLocaleString()}
+        </div>
       </body>
     </html>
   `);
@@ -132,22 +185,21 @@ const FilteredReports = () => {
     printWindow.close();
   };
   return (
-    <div className="bg-base-200 min-h-screen py-10">
-      <div className="max-w-7xl mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-10 text-primary text-center">
-          Filtered by <span className="text-secondary">{selectedFilter}</span>
+    <div className='bg-base-200 min-h-screen py-10'>
+      <div className='max-w-7xl mx-auto px-4'>
+        <h1 className='text-3xl font-bold mb-10 text-primary text-center'>
+          Filtered by <span className='text-secondary'>{selectedFilter}</span>
         </h1>
 
-        <div className="flex flex-col items-center gap-4 mb-8">
+        <div className='flex flex-col items-center gap-4 mb-8'>
           {/* Filter Type Selector */}
           <select
-            className="select select-bordered w-full max-w-xs"
+            className='select select-bordered w-full max-w-xs'
             value={selectedFilter}
             onChange={(e) => {
               setSelectedFilter(e.target.value);
-              setSelectedValue(""); // reset value
-            }}
-          >
+              setSelectedValue(''); // reset value
+            }}>
             <option>Instructor</option>
             <option>Dean</option>
             <option>Building</option>
@@ -158,16 +210,17 @@ const FilteredReports = () => {
           </select>
 
           {/* Value Selector Based on Filter */}
-          {selectedFilter === "Instructor" && (
+          {selectedFilter === 'Instructor' && (
             <select
-              className="select select-bordered w-full max-w-xs"
+              className='select select-bordered w-full max-w-xs'
               value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Instructor</option>
+              onChange={(e) => setSelectedValue(e.target.value)}>
+              <option value=''>Select Instructor</option>
               {Array.isArray(instructorsList) && instructorsList.length > 0 ? (
                 instructorsList.map((prof) => (
-                  <option key={prof.id} value={prof.id}>
+                  <option
+                    key={prof.id}
+                    value={prof.id}>
                     {prof.fullName}
                   </option>
                 ))
@@ -177,16 +230,17 @@ const FilteredReports = () => {
             </select>
           )}
 
-          {selectedFilter === "Dean" && (
+          {selectedFilter === 'Dean' && (
             <select
-              className="select select-bordered w-full max-w-xs"
+              className='select select-bordered w-full max-w-xs'
               value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Dean</option>
+              onChange={(e) => setSelectedValue(e.target.value)}>
+              <option value=''>Select Dean</option>
               {Array.isArray(instructorsList) && instructorsList.length > 0 ? (
                 deansList.map((dean) => (
-                  <option key={dean.id} value={dean.id}>
+                  <option
+                    key={dean.id}
+                    value={dean.id}>
                     {dean.fullName}
                   </option>
                 ))
@@ -196,40 +250,42 @@ const FilteredReports = () => {
             </select>
           )}
 
-          {selectedFilter === "Building" && (
+          {selectedFilter === 'Building' && (
             <select
-              className="select select-bordered w-full max-w-xs"
+              className='select select-bordered w-full max-w-xs'
               value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Building</option>
+              onChange={(e) => setSelectedValue(e.target.value)}>
+              <option value=''>Select Building</option>
               {buildingList.map((bldg) => (
-                <option key={bldg} value={bldg}>
+                <option
+                  key={bldg}
+                  value={bldg}>
                   {bldg}
                 </option>
               ))}
             </select>
           )}
 
-          {selectedFilter === "Date" && (
+          {selectedFilter === 'Date' && (
             <input
-              type="date"
-              className="input input-bordered w-full max-w-xs"
+              type='date'
+              className='input input-bordered w-full max-w-xs'
               value={selectedValue}
               onChange={(e) => setSelectedValue(e.target.value)}
             />
           )}
 
-          {selectedFilter === "Subject" && (
+          {selectedFilter === 'Subject' && (
             <>
               <select
-                className="select select-bordered w-full max-w-xs mb-4"
+                className='select select-bordered w-full max-w-xs mb-4'
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-              >
-                <option value="">Select Year</option>
+                onChange={(e) => setSelectedYear(e.target.value)}>
+                <option value=''>Select Year</option>
                 {Object.keys(subjectsByYear).map((year) => (
-                  <option key={year} value={year}>
+                  <option
+                    key={year}
+                    value={year}>
                     {year}
                   </option>
                 ))}
@@ -237,13 +293,14 @@ const FilteredReports = () => {
 
               {selectedYear && (
                 <select
-                  className="select select-bordered w-full max-w-xs mb-4"
+                  className='select select-bordered w-full max-w-xs mb-4'
                   value={selectedValue}
-                  onChange={(e) => setSelectedValue(e.target.value)}
-                >
-                  <option value="">Select Subject</option>
+                  onChange={(e) => setSelectedValue(e.target.value)}>
+                  <option value=''>Select Subject</option>
                   {subjectList.map((subject) => (
-                    <option key={subject} value={subject}>
+                    <option
+                      key={subject}
+                      value={subject}>
                       {subject}
                     </option>
                   ))}
@@ -252,35 +309,37 @@ const FilteredReports = () => {
             </>
           )}
 
-          {selectedFilter === "Year" && (
+          {selectedFilter === 'Year' && (
             <select
-              className="select select-bordered w-full max-w-xs mb-4"
+              className='select select-bordered w-full max-w-xs mb-4'
               value={selectedValue}
-              onChange={(e) => setSelectedValue(e.target.value)}
-            >
-              <option value="">Select Year Level</option>
+              onChange={(e) => setSelectedValue(e.target.value)}>
+              <option value=''>Select Year Level</option>
               {Object.keys(subjectsByYear).map((year) => (
-                <option key={year} value={year}>
+                <option
+                  key={year}
+                  value={year}>
                   {year}
                 </option>
               ))}
             </select>
           )}
 
-          {selectedFilter === "Section" && (
-            <div className="flex flex-col gap-4">
+          {selectedFilter === 'Section' && (
+            <div className='flex flex-col gap-4'>
               {/* Year Level Dropdown */}
               <select
-                className="select select-bordered w-full max-w-xs"
+                className='select select-bordered w-full max-w-xs'
                 value={selectedYear}
                 onChange={(e) => {
                   setSelectedYear(e.target.value);
-                  setSelectedValue(""); // reset section when year changes
-                }}
-              >
-                <option value="">Select Year Level</option>
+                  setSelectedValue(''); // reset section when year changes
+                }}>
+                <option value=''>Select Year Level</option>
                 {Object.keys(sections).map((year) => (
-                  <option key={year} value={year}>
+                  <option
+                    key={year}
+                    value={year}>
                     Year {year}
                   </option>
                 ))}
@@ -289,13 +348,14 @@ const FilteredReports = () => {
               {/* Section Dropdown (filtered by year) */}
               {selectedYear && (
                 <select
-                  className="select select-bordered w-full max-w-xs"
+                  className='select select-bordered w-full max-w-xs'
                   value={selectedValue}
-                  onChange={(e) => setSelectedValue(e.target.value)}
-                >
-                  <option value="">Select Section</option>
+                  onChange={(e) => setSelectedValue(e.target.value)}>
+                  <option value=''>Select Section</option>
                   {sections[selectedYear].map((section) => (
-                    <option key={section} value={section}>
+                    <option
+                      key={section}
+                      value={section}>
                       {section}
                     </option>
                   ))}
@@ -306,88 +366,90 @@ const FilteredReports = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-neutral-content">
+          <p className='text-center text-neutral-content'>
             Loading schedule...
           </p>
         ) : Object.keys(groupedByProfessor).length > 0 ? (
           Object.entries(groupedByProfessor).map(([professor, entries]) => (
-            <div key={professor} className="mb-4">
-              <div id={`print-area-${professor}`} className="print-area">
-                <div className="card bg-slate-50 shadow-lg">
-                  <div className="card-body">
-                    <div className="text-center mb-10">
+            <div
+              key={professor}
+              className='mb-4'>
+              <div
+                id={`print-area-${professor}`}
+                className='print-area'>
+                <div className='card bg-slate-50 shadow-lg'>
+                  <div className='card-body'>
+                    <div className='text-center mb-10'>
                       <img
-                        src="/favicon.png"
-                        alt="City College of Angeles Logo"
-                        className="mx-auto h-16 mb-2"
+                        src='/favicon.png'
+                        alt='City College of Angeles Logo'
+                        className='mx-auto h-16 mb-2'
                       />
-                      <h1 className="text-lg font-bold uppercase text-black">
+                      <h1 className='text-lg font-bold uppercase text-black'>
                         City College of Angeles
                       </h1>
-                      <h2 className="text-sm font-medium uppercase text-black tracking-wide">
+                      <h2 className='text-sm font-medium uppercase text-black tracking-wide'>
                         Institute of Business and Management
                       </h2>
                     </div>
 
-                    <div className="flex items-center justify-between mb-6">
+                    <div className='flex items-center justify-between mb-6'>
                       <button
                         onClick={() => handlePrintCard(professor)}
-                        className="btn btn-outline btn-primary"
-                      >
+                        className='btn btn-outline btn-primary'>
                         🖨️ Print
                       </button>
                     </div>
-                    <div className="overflow-x-auto">
-                      <table className="table table-sm w-full">
-                        <thead className="bg-gray-700 text-white sticky top-0 z-10">
+                    <div className='overflow-x-auto'>
+                      <table className='table table-sm w-full'>
+                        <thead className='bg-gray-700 text-white sticky top-0 z-10'>
                           <tr>
-                            <th className="text-sm">Date</th>
-                            <th className="text-sm">Time</th>
-                            <th className="text-sm">Room</th>
-                            <th className="text-sm">Floor</th>
-                            <th className="text-sm">Building</th>
-                            <th className="text-sm">Subject</th>
-                            <th className="text-sm">Year</th>
-                            <th className="text-sm border-r border-white">
+                            <th className='text-sm'>Date</th>
+                            <th className='text-sm'>Time</th>
+                            <th className='text-sm'>Room</th>
+                            <th className='text-sm'>Floor</th>
+                            <th className='text-sm'>Building</th>
+                            <th className='text-sm'>Subject</th>
+                            <th className='text-sm'>Year</th>
+                            <th className='text-sm border-r border-white'>
                               Section
                             </th>
-                            <th className="text-sm">Professor</th>
-                            <th className="text-sm">Assigned By</th>
+                            <th className='text-sm'>Professor</th>
+                            <th className='text-sm'>Assigned By</th>
                           </tr>
                         </thead>
                         <tbody>
                           {Array.isArray(entries) ? (
                             [...entries]
                               .sort(
-                                (a, b) => new Date(a.date) - new Date(b.date)
+                                (a, b) => new Date(a.date) - new Date(b.date),
                               )
                               .map((entry, index) => (
                                 <tr
                                   key={entry._id}
                                   className={
                                     index % 2 === 0
-                                      ? "bg-gray-500"
-                                      : "bg-gray-600"
-                                  }
-                                >
+                                      ? 'bg-[#FFF8E7]' // Cosmic Latte
+                                      : 'bg-[#f5f0dc]' // slightly darker variant
+                                  }>
                                   <td>
                                     {new Date(entry.date).toLocaleDateString()}
                                   </td>
                                   <td>
                                     <span>
                                       {new Date(
-                                        `1970-01-01T${entry.timeStart}`
-                                      ).toLocaleTimeString("en-US", {
-                                        hour: "numeric",
-                                        minute: "2-digit",
+                                        `1970-01-01T${entry.timeStart}`,
+                                      ).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
                                         hour12: true,
-                                      })}{" "}
-                                      –{" "}
+                                      })}{' '}
+                                      –{' '}
                                       {new Date(
-                                        `1970-01-01T${entry.timeEnd}`
-                                      ).toLocaleTimeString("en-US", {
-                                        hour: "numeric",
-                                        minute: "2-digit",
+                                        `1970-01-01T${entry.timeEnd}`,
+                                      ).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
                                         hour12: true,
                                       })}
                                     </span>
@@ -397,11 +459,13 @@ const FilteredReports = () => {
                                   <td>{entry.building}</td>
                                   <td>{entry.subject}</td>
                                   <td>{entry.year}</td>
-                                  <td className="text-sm border-r border-white">
+                                  <td className='text-sm border-r border-white'>
                                     {entry.section}
                                   </td>
-                                  <td>{entry.professor?.fullName}</td>
-                                  <td className="text-sm text-white">
+                                  <td className='font-bold'>
+                                    {entry.professor?.fullName}
+                                  </td>
+                                  <td className='text-sm font-bold'>
                                     {entry.assignedBy?.fullName}
                                   </td>
                                 </tr>
@@ -409,9 +473,8 @@ const FilteredReports = () => {
                           ) : (
                             <tr>
                               <td
-                                colSpan="10"
-                                className="text-center text-white bg-red-500"
-                              >
+                                colSpan='10'
+                                className='text-center text-white bg-red-500'>
                                 ⚠️ Invalid data — entries is not an array
                               </td>
                             </tr>
@@ -425,7 +488,7 @@ const FilteredReports = () => {
             </div>
           ))
         ) : (
-          <p className="text-center text-neutral-content mt-10">
+          <p className='text-center text-neutral-content mt-10'>
             No schedule data available.
           </p>
         )}
