@@ -23,9 +23,7 @@ const DisplayingEmployees = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Split employees by role
-  const deans = (employees || []).filter(
-    (emp) => emp?.role === "Dean" || emp?.role === "SuperAdmin"
-  );
+  const deans = (employees || []).filter((emp) => emp?.role === "Dean");
   const instructors = (employees || []).filter(
     (emp) => emp?.role === "Instructor"
   );
@@ -56,7 +54,7 @@ const DisplayingEmployees = () => {
       <div className="max-w-6xl mx-auto px-4">
         {/* Add Employee */}
         <div className="flex gap-3 items-center mb-6">
-          <AddEmployee setEmployees={setEmployees} />
+          <AddEmployee setEmployees={setEmployees} deansList={deans} />
         </div>
 
         {/* Import CSV (SuperAdmin only) */}
