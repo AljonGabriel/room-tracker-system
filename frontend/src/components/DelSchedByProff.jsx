@@ -1,0 +1,74 @@
+import React, { useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const DelSchedByProff = ({ profID, profName, onSetOccupiedTimes }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isLocal = window.location.hostname === 'localhost';
+  const API_BASE = isLocal
+    ? 'http://localhost:5001'
+    : import.meta.env.VITE_API_BASE;
+
+  const handleDelete = async () => {
+    try {
+      const res = await axios.delete(
+        `${API_BASE}/api/employees/byprof/${profID}`,
+      );
+      toast.success(
+        `Deleted ${res.data.deletedCount} room(s) assigned to ${profName}`,
+      );
+      onSetOccupiedTimes((prev) =>
+        prev.filter((room) => {
+          const profRef =
+            typeof room.professor === 'object'
+              ? room.professor?._id // populated object
+              : room.professor; // plain id
+
+          return String(profRef) !== String(profID);
+        }),
+      );
+    } catch (error) {
+      console.error('Error deleting rooms:', error);
+      toast.error('Failed to delete assigned rooms');
+    } finally {
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        className='btn btn-sm btn-outline btn-warning'
+        onClick={() => setIsOpen(true)}>
+        Delete all assigned rooms
+      </button>
+
+      {isOpen && (
+        <dialog className='modal modal-open'>
+          <div className='modal-box'>
+            <h3 className='font-bold text-lg text-warning'>Confirm Delete</h3>
+            <p className='py-2'>
+              Are you sure you want to delete all rooms assigned to{' '}
+              <strong>{profName}</strong>?
+            </p>
+            <div className='modal-action'>
+              <button
+                className='btn btn-outline'
+                onClick={() => setIsOpen(false)}>
+                Cancel
+              </button>
+              <button
+                className='btn btn-warning'
+                onClick={handleDelete}>
+                Confirm Delete
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
+    </>
+  );
+};
+
+export default DelSchedByProff;
